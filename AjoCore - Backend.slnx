@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="AjoCoreBackend.API/AjoCoreBackend.API.csproj" />
+  <Project Path="AjoCoreBackend.Application/AjoCoreBackend.Application.csproj" />
+  <Project Path="AjoCoreBackend.Domain/AjoCoreBackend.Domain.csproj" />
+  <Project Path="AjoCoreBackend.Infrastructure/AjoCoreBackend.Infrastructure.csproj" />
+  <Project Path="AjoCoreBackend.Persistence/AjoCoreBackend.Persistence.csproj" />
+</Solution>

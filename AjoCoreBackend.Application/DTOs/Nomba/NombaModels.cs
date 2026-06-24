@@ -1,0 +1,61 @@
+namespace AjoCoreBackend.Application.DTOs.Nomba
+{
+    // Sub-Account Models
+    public record CreateSubAccountRequest
+    {
+        public string AccountName { get; init; } = string.Empty;
+        public string Email { get; init; } = string.Empty;
+    }
+
+    public record CreateSubAccountResponse
+    {
+        public string SubAccountId { get; init; } = string.Empty;
+        public string Message { get; init; } = string.Empty;
+        public string Code { get; init; } = string.Empty;
+    }
+
+    // Virtual Account Models
+    public record CreateVirtualAccountRequest
+    {
+        public string SubAccountId { get; init; } = string.Empty;
+        public string AccountReference { get; init; } = string.Empty;
+        public string Currency { get; init; } = "NGN";
+    }
+
+    public record CreateVirtualAccountResponse
+    {
+        public string AccountNumber { get; init; } = string.Empty;
+        public string BankName { get; init; } = string.Empty;
+        public string AccountName { get; init; } = string.Empty;
+    }
+
+    // Transfer Lookup Models
+    public record BankLookupRequest
+    {
+        public string AccountNumber { get; init; } = string.Empty;
+        public string BankCode { get; init; } = string.Empty;
+    }
+
+    public record BankLookupResponse
+    {
+        public string AccountName { get; init; } = string.Empty;
+    }
+
+    // Transfer Bank Models
+    public record BankTransferRequest
+    {
+        public decimal Amount { get; init; } // Note: Nomba expects Kobo, we will transform this before HTTP send or serialize correctly
+        public string AccountNumber { get; init; } = string.Empty;
+        public string AccountName { get; init; } = string.Empty;
+        public string BankCode { get; init; } = string.Empty;
+        public string MerchantTxRef { get; init; } = string.Empty;
+        public string SenderName { get; init; } = string.Empty;
+    }
+
+    public record BankTransferResponse
+    {
+        public string Status { get; init; } = string.Empty; // e.g., "SUCCESS", "PENDING"
+        public string Message { get; init; } = string.Empty;
+        public string TransactionId { get; init; } = string.Empty;
+    }
+}

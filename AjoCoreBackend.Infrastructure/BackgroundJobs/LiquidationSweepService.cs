@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AjoCoreBackend.Application.DTOs.Nomba;
 using AjoCoreBackend.Application.Interfaces.Repositories;
 using AjoCoreBackend.Application.Interfaces.Services;
 using AjoCoreBackend.Domain.Entities;
@@ -122,11 +123,11 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
                     continue;
                 }
                 
-                var transferRequest = new Application.DTOs.Nomba.BankTransferRequest
+                var transferRequest = new BankTransferRequest
                 {
                     Amount = totalPayout,
                     AccountNumber = payoutMember.VirtualAccount.AccountNumber ?? "",
-                    AccountName = lookupResponse.AccountName, // Use verified account name from lookup
+                    AccountName = lookupResponse.AccountName, 
                     BankCode = lookupRequest.BankCode,
                     MerchantTxRef = merchantTxRef,
                     SenderName = "AjoCore Thrift"
@@ -134,7 +135,7 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
 
                 var transferResponse = await nombaApiClient.ExecuteBankTransferAsync(transferRequest);
 
-                if (transferResponse != null) // If successful
+                if (transferResponse != null) 
                 {
                     var payoutLedger = new PayoutLedger
                     {

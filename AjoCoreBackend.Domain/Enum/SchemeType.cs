@@ -4,7 +4,9 @@ using System.Text;
 
 namespace AjoCoreBackend.Domain.Enum
 {
-    internal class SchemeType
+    public enum SchemeType
     {
+        Rotational,
+        Accumulated
     }
 }

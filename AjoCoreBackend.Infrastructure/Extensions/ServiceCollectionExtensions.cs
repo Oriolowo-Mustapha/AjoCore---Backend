@@ -9,8 +9,12 @@ namespace AjoCoreBackend.Infrastructure.Extensions
     {
         public static IServiceCollection AddExternalServices(this IServiceCollection services)
         {
-            // Register Nomba API Client
-            // Note: In production, configure BaseAddress and Polly retry policies here
+            // Register Nomba API Clients
+            services.AddHttpClient<INombaTokenService, NombaTokenService>(client =>
+            {
+                client.BaseAddress = new Uri("https://api.nomba.com");
+            });
+
             services.AddHttpClient<INombaApiClient, NombaApiClient>(client =>
             {
                 client.BaseAddress = new Uri("https://api.nomba.com");
@@ -19,6 +23,9 @@ namespace AjoCoreBackend.Infrastructure.Extensions
             // Register Internal Services
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
             services.AddScoped<IWebhookSignatureValidator, WebhookSignatureValidator>();
+
+            // Register Background Jobs
+            services.AddHostedService<BackgroundJobs.LiquidationSweepService>();
 
             return services;
         }

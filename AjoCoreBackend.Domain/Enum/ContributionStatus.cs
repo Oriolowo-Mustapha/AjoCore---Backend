@@ -4,7 +4,12 @@ using System.Text;
 
 namespace AjoCoreBackend.Domain.Enum
 {
-    internal class ContributionStatus
+    public enum ContributionStatus
     {
+        Pending,
+        FullyPaid,
+        UnderPaid,
+        OverPaid,
+        Late
     }
 }

@@ -4,7 +4,11 @@ using System.Text;
 
 namespace AjoCoreBackend.Domain.Enum
 {
-    internal class PayoutStatus
+    public enum PayoutStatus
     {
+        NotDue,
+        Pending,
+        Settled,
+        Failed
     }
 }

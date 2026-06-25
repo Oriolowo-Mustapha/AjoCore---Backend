@@ -8,16 +8,12 @@ namespace AjoCoreBackend.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Trader> builder)
         {
-            builder.HasKey(t => t.Id);
-
-            builder.Property(t => t.FirstName).IsRequired().HasMaxLength(50);
-            builder.Property(t => t.LastName).IsRequired().HasMaxLength(50);
-            
-            builder.Property(t => t.Email).IsRequired().HasMaxLength(100);
-            builder.HasIndex(t => t.Email).IsUnique();
-
-            builder.Property(t => t.PhoneNumber).IsRequired().HasMaxLength(20);
-            builder.Property(t => t.Bvn).HasMaxLength(11);
+            builder.HasKey(x => x.Id);
+            builder.HasIndex(x => x.Email).IsUnique();
+            builder.Property(x => x.Email).IsRequired().HasMaxLength(256);
+            builder.Property(x => x.PasswordHash).IsRequired();
+            builder.Property(x => x.FirstName).IsRequired().HasMaxLength(100);
+            builder.Property(x => x.LastName).IsRequired().HasMaxLength(100);
         }
     }
 }

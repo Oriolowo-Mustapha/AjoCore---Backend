@@ -24,6 +24,8 @@ namespace AjoCoreBackend.Infrastructure.Extensions
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
             services.AddSingleton<IBankCodeService, BankCodeService>();
             services.AddScoped<IWebhookSignatureValidator, WebhookSignatureValidator>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
 
             // Register Background Jobs
             services.AddHostedService<BackgroundJobs.LiquidationSweepService>();

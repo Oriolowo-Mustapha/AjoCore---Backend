@@ -12,8 +12,8 @@ namespace AjoCoreBackend.Infrastructure.Services
 
         public WebhookSignatureValidator(IConfiguration configuration)
         {
-            _clientSecret = configuration["Nomba:ClientSecret"] 
-                ?? throw new ArgumentNullException("Nomba ClientSecret is missing in configuration.");
+            _clientSecret = configuration["Nomba:WebhookSigningKey"] 
+                ?? throw new ArgumentNullException("Nomba WebhookSigningKey is missing in configuration.");
         }
 
         public bool ValidateSignature(string payload, string signatureHeader)

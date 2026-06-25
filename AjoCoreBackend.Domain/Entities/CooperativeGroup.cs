@@ -12,5 +12,6 @@ namespace AjoCoreBackend.Domain.Entities
         // Navigation Properties
         public Trader AdminTrader { get; set; } = null!;
         public ICollection<SavingCycle> Cycles { get; set; } = new List<SavingCycle>();
+        public ICollection<CooperativeGroupMember> Members { get; set; } = new List<CooperativeGroupMember>();
     }
 }

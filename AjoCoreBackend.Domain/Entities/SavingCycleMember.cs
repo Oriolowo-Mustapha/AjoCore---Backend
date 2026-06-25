@@ -11,6 +11,7 @@ namespace AjoCoreBackend.Domain.Entities
         public Guid UserId { get; set; }
         public int PayoutOrder { get; set; }
         public MemberStatus Status { get; set; }
+        public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.Pending;
         
         // Navigation Properties
         public SavingCycle Cycle { get; set; } = null!;

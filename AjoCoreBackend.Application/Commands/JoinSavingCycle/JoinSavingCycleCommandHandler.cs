@@ -16,17 +16,23 @@ namespace AjoCoreBackend.Application.Commands.JoinSavingCycle
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INombaApiClient _nombaApiClient;
+        private readonly ICurrentUserService _currentUserService;
 
         public JoinSavingCycleCommandHandler(
             IUnitOfWork unitOfWork,
-            INombaApiClient nombaApiClient)
+            INombaApiClient nombaApiClient,
+            ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _nombaApiClient = nombaApiClient;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Guid> Handle(JoinSavingCycleCommand request, CancellationToken cancellationToken)
         {
+            var userId = Guid.Parse(_currentUserService.UserId 
+                ?? throw new ForbiddenAccessException("You must be logged in."));
+
             var cycle = await _unitOfWork.SavingCycles.GetCycleWithMembersAsync(request.SavingCycleId);
 
             if (cycle == null)
@@ -39,16 +45,28 @@ namespace AjoCoreBackend.Application.Commands.JoinSavingCycle
                 throw new CycleAlreadyStartedException(cycle.Id);
             }
 
-            if (cycle.Members.Any(m => m.UserId == request.UserId))
+            if (cycle.Members.Any(m => m.UserId == userId))
             {
-                throw new MemberAlreadyExistsException(request.UserId, cycle.Id);
+                throw new MemberAlreadyExistsException(userId, cycle.Id);
+            }
+
+            if (cycle.CooperativeGroupId.HasValue)
+            {
+                var groupMemberships = await _unitOfWork.Repository<CooperativeGroupMember>()
+                    .FindAsync(m => m.CooperativeGroupId == cycle.CooperativeGroupId.Value && m.TraderId == userId);
+                
+                var membership = groupMemberships.FirstOrDefault();
+                if (membership == null || membership.Status != ApprovalStatus.Approved)
+                {
+                    throw new ForbiddenAccessException("You must be an approved member of the Cooperative Group to join this saving cycle.");
+                }
             }
 
             // Provision a NUBAN Virtual Account attached to the cycle's Nomba Sub-Account
             var virtualAccountResponse = await _nombaApiClient.CreateVirtualAccountAsync(new CreateVirtualAccountRequest
             {
                 SubAccountId = cycle.NombaSubAccountId,
-                AccountReference = $"member_{request.UserId:N}"
+                AccountReference = $"member_{userId:N}"
             });
 
             var virtualAccount = new NombaVirtualAccount
@@ -64,7 +82,7 @@ namespace AjoCoreBackend.Application.Commands.JoinSavingCycle
             var member = new SavingCycleMember
             {
                 SavingCycleId = request.SavingCycleId,
-                UserId = request.UserId,
+                UserId = userId,
                 Status = MemberStatus.Active,
                 PayoutOrder = highestOrder + 1,
                 VirtualAccount = virtualAccount

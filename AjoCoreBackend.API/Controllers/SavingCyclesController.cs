@@ -53,12 +53,11 @@ namespace AjoCoreBackend.API.Controllers
         /// Trader requests to join a saving cycle.
         /// </summary>
         [HttpPost("{id}/join")]
-        public async Task<IActionResult> Join(Guid id, [FromBody] JoinSavingCycleRequest request)
+        public async Task<IActionResult> Join(Guid id)
         {
             var command = new JoinSavingCycleCommand
             {
-                SavingCycleId = id,
-                UserId = request.UserId
+                SavingCycleId = id
             };
             var memberId = await _mediator.Send(command);
             return Ok(new { memberId });
@@ -85,10 +84,5 @@ namespace AjoCoreBackend.API.Controllers
             var result = await _mediator.Send(new GetMemberContributionsQuery { SavingCycleMemberId = memberId });
             return Ok(result);
         }
-    }
-
-    public class JoinSavingCycleRequest
-    {
-        public Guid UserId { get; set; }
     }
 }

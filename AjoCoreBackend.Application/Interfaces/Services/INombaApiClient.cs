@@ -9,5 +9,6 @@ namespace AjoCoreBackend.Application.Interfaces.Services
         Task<CreateVirtualAccountResponse> CreateVirtualAccountAsync(CreateVirtualAccountRequest request);
         Task<BankLookupResponse> LookupBankAccountAsync(BankLookupRequest request);
         Task<BankTransferResponse> ExecuteBankTransferAsync(BankTransferRequest request);
+        Task<FetchBanksResponse> FetchBanksAsync();
     }
 }

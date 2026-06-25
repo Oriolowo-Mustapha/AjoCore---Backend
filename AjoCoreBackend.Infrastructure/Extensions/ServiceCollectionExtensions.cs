@@ -22,6 +22,7 @@ namespace AjoCoreBackend.Infrastructure.Extensions
 
             // Register Internal Services
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+            services.AddSingleton<IBankCodeService, BankCodeService>();
             services.AddScoped<IWebhookSignatureValidator, WebhookSignatureValidator>();
 
             // Register Background Jobs

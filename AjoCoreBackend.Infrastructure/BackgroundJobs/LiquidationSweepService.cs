@@ -48,6 +48,7 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
             using var scope = _serviceProvider.CreateScope();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var nombaApiClient = scope.ServiceProvider.GetRequiredService<INombaApiClient>();
+            var bankCodeService = scope.ServiceProvider.GetRequiredService<IBankCodeService>();
             var dateTimeProvider = scope.ServiceProvider.GetRequiredService<IDateTimeProvider>();
 
             var now = dateTimeProvider.UtcNow;
@@ -88,12 +89,45 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
                 // For a ROSCA, the payout amount is ContributionAmount * MemberCount
                 var totalPayout = cycle.ContributionAmount * cycleWithMembers.Members.Count;
                 
+                // Get the actual BankCode from the BankName using our cached service
+                var actualBankCode = await bankCodeService.GetBankCodeByNameAsync(payoutMember.VirtualAccount.BankName ?? "");
+                
+                if (string.IsNullOrEmpty(actualBankCode))
+                {
+                    _logger.LogWarning($"Could not resolve BankCode for {payoutMember.VirtualAccount.BankName}. Skipping payout {merchantTxRef}.");
+                    continue;
+                }
+
+                // Lookup bank name from Nomba before transfer (as per spec)
+                var lookupRequest = new Application.DTOs.Nomba.BankLookupRequest
+                {
+                    AccountNumber = payoutMember.VirtualAccount.AccountNumber ?? "",
+                    BankCode = actualBankCode
+                };
+                
+                Application.DTOs.Nomba.BankLookupResponse lookupResponse;
+                try
+                {
+                    lookupResponse = await nombaApiClient.LookupBankAccountAsync(lookupRequest);
+                    
+                    if (string.IsNullOrWhiteSpace(lookupResponse.AccountName))
+                    {
+                        _logger.LogWarning($"Bank lookup failed for Account {lookupRequest.AccountNumber}, BankCode {lookupRequest.BankCode}. Skipping payout {merchantTxRef}.");
+                        continue;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error validating bank account for payout {merchantTxRef}. Skipping.");
+                    continue;
+                }
+                
                 var transferRequest = new Application.DTOs.Nomba.BankTransferRequest
                 {
                     Amount = totalPayout,
                     AccountNumber = payoutMember.VirtualAccount.AccountNumber ?? "",
-                    AccountName = payoutMember.VirtualAccount.AccountName ?? "AjoCore Member",
-                    BankCode = payoutMember.VirtualAccount.BankName ?? "033", // Dummy mapping for now
+                    AccountName = lookupResponse.AccountName, // Use verified account name from lookup
+                    BankCode = lookupRequest.BankCode,
                     MerchantTxRef = merchantTxRef,
                     SenderName = "AjoCore Thrift"
                 };

@@ -58,4 +58,16 @@ namespace AjoCoreBackend.Application.DTOs.Nomba
         public string Message { get; init; } = string.Empty;
         public string TransactionId { get; init; } = string.Empty;
     }
+
+    // Bank Codes Models
+    public record FetchBanksResponse
+    {
+        public System.Collections.Generic.List<BankDto> Data { get; init; } = new();
+    }
+
+    public record BankDto
+    {
+        public string Code { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
+    }
 }

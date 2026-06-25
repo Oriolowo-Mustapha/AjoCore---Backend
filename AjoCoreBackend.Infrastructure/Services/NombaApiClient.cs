@@ -71,5 +71,14 @@ namespace AjoCoreBackend.Infrastructure.Services
             return await response.Content.ReadFromJsonAsync<BankTransferResponse>()
                    ?? new BankTransferResponse();
         }
+
+        public async Task<FetchBanksResponse> FetchBanksAsync()
+        {
+            await SetAuthorizationHeaderAsync();
+            var response = await _httpClient.GetAsync("/v1/transfers/banks");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<FetchBanksResponse>()
+                   ?? new FetchBanksResponse();
+        }
     }
 }

@@ -5,12 +5,15 @@ using AjoCoreBackend.Application.Commands.JoinSavingCycle;
 using AjoCoreBackend.Application.Commands.StartSavingCycle;
 using AjoCoreBackend.Application.Queries.GetAllSavingCycles;
 using AjoCoreBackend.Application.Queries.GetSavingCycleById;
+using AjoCoreBackend.Application.Queries.GetMemberContributions;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AjoCoreBackend.API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/saving-cycles")]
     public class SavingCyclesController : ControllerBase
     {
@@ -21,6 +24,10 @@ namespace AjoCoreBackend.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Create a new saving cycle under a cooperative group. Admin only.
+        /// </summary>
+        [Authorize(Roles = "CooperativeAdmin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateSavingCycleCommand command)
         {
@@ -42,6 +49,9 @@ namespace AjoCoreBackend.API.Controllers
             return Ok(cycle);
         }
 
+        /// <summary>
+        /// Trader requests to join a saving cycle.
+        /// </summary>
         [HttpPost("{id}/join")]
         public async Task<IActionResult> Join(Guid id, [FromBody] JoinSavingCycleRequest request)
         {
@@ -54,12 +64,26 @@ namespace AjoCoreBackend.API.Controllers
             return Ok(new { memberId });
         }
 
+        /// <summary>
+        /// Start a saving cycle. Admin only.
+        /// </summary>
+        [Authorize(Roles = "CooperativeAdmin")]
         [HttpPost("{id}/start")]
         public async Task<IActionResult> Start(Guid id)
         {
             var command = new StartSavingCycleCommand { SavingCycleId = id };
             await _mediator.Send(command);
             return Ok();
+        }
+
+        /// <summary>
+        /// Get contributions for a specific member.
+        /// </summary>
+        [HttpGet("members/{memberId}/contributions")]
+        public async Task<IActionResult> GetContributions(Guid memberId)
+        {
+            var result = await _mediator.Send(new GetMemberContributionsQuery { SavingCycleMemberId = memberId });
+            return Ok(result);
         }
     }
 

@@ -52,6 +52,21 @@ namespace AjoCoreBackend.API.Middlewares
                     response = new { error = notFoundException.Message };
                     break;
 
+                case ForbiddenAccessException forbiddenException:
+                    statusCode = (int)HttpStatusCode.Forbidden;
+                    response = new { error = forbiddenException.Message };
+                    break;
+
+                case InvalidCredentialsException credentialsException:
+                    statusCode = (int)HttpStatusCode.Unauthorized;
+                    response = new { error = credentialsException.Message };
+                    break;
+
+                case DuplicateEmailException duplicateEmailException:
+                    statusCode = (int)HttpStatusCode.Conflict;
+                    response = new { error = duplicateEmailException.Message };
+                    break;
+
                 case DuplicateWebhookException duplicateException:
                     statusCode = (int)HttpStatusCode.Conflict;
                     response = new { error = duplicateException.Message };

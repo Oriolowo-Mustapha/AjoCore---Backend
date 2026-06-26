@@ -14,6 +14,11 @@ namespace AjoCoreBackend.Domain.Entities
         public UserRole Role { get; set; } = UserRole.Trader;
         public string? Bvn { get; set; }
         public DateTime DateOfBirth { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
+        
+        public string? ResetPasswordToken { get; set; }
+        public DateTime? ResetPasswordTokenExpiry { get; set; }
 
         // Navigation Properties
         public ICollection<CooperativeGroup> AdministeredGroups { get; set; } = new List<CooperativeGroup>();

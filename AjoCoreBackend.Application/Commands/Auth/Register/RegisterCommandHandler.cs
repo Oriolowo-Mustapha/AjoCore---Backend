@@ -55,10 +55,17 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var token = _jwtTokenService.GenerateToken(trader);
+            var refreshToken = _jwtTokenService.GenerateRefreshToken();
+
+            trader.RefreshToken = refreshToken;
+            trader.RefreshTokenExpiryTime = System.DateTime.UtcNow.AddDays(7);
+            _unitOfWork.Repository<Trader>().Update(trader);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new AuthResponseDto
             {
                 Token = token,
+                RefreshToken = refreshToken,
                 Email = trader.Email,
                 FullName = $"{trader.FirstName} {trader.LastName}",
                 Role = trader.Role.ToString(),

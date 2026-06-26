@@ -36,6 +36,7 @@ namespace AjoCoreBackend.Infrastructure.Extensions
 
             // Register Background Jobs
             services.AddHostedService<BackgroundJobs.LiquidationSweepService>();
+            services.AddHostedService<BackgroundJobs.SavingReminderService>();
 
             return services;
         }

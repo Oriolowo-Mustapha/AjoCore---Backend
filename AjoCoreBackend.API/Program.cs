@@ -11,7 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // Register Clean Architecture Layers
 builder.Services.AddApplicationLayer();
@@ -65,7 +66,8 @@ app.UseMiddleware<AjoCoreBackend.API.Middlewares.ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AjoCore API v1"));
 }
 
 app.UseHttpsRedirection();

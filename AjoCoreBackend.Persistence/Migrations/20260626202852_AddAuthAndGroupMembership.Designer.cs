@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AjoCoreBackend.Persistence.Migrations
 {
     [DbContext(typeof(AjoCoreDbContext))]
-    [Migration("20260625211524_Phase9Complete")]
-    partial class Phase9Complete
+    [Migration("20260626202852_AddAuthAndGroupMembership")]
+    partial class AddAuthAndGroupMembership
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -91,6 +91,40 @@ namespace AjoCoreBackend.Persistence.Migrations
                     b.HasIndex("AdminTraderId");
 
                     b.ToTable("CooperativeGroups");
+                });
+
+            modelBuilder.Entity("AjoCoreBackend.Domain.Entities.CooperativeGroupMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CooperativeGroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TraderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TraderId");
+
+                    b.HasIndex("CooperativeGroupId", "TraderId")
+                        .IsUnique();
+
+                    b.ToTable("CooperativeGroupMembers");
                 });
 
             modelBuilder.Entity("AjoCoreBackend.Domain.Entities.InboundTransaction", b =>
@@ -303,6 +337,9 @@ namespace AjoCoreBackend.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -344,8 +381,7 @@ namespace AjoCoreBackend.Persistence.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Bvn")
-                        .HasMaxLength(11)
-                        .HasColumnType("character varying(11)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -355,23 +391,29 @@ namespace AjoCoreBackend.Persistence.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("text");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -404,6 +446,25 @@ namespace AjoCoreBackend.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("AdminTrader");
+                });
+
+            modelBuilder.Entity("AjoCoreBackend.Domain.Entities.CooperativeGroupMember", b =>
+                {
+                    b.HasOne("AjoCoreBackend.Domain.Entities.CooperativeGroup", "Group")
+                        .WithMany("Members")
+                        .HasForeignKey("CooperativeGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AjoCoreBackend.Domain.Entities.Trader", "Trader")
+                        .WithMany("GroupMemberships")
+                        .HasForeignKey("TraderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Trader");
                 });
 
             modelBuilder.Entity("AjoCoreBackend.Domain.Entities.InboundTransaction", b =>
@@ -478,6 +539,8 @@ namespace AjoCoreBackend.Persistence.Migrations
             modelBuilder.Entity("AjoCoreBackend.Domain.Entities.CooperativeGroup", b =>
                 {
                     b.Navigation("Cycles");
+
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("AjoCoreBackend.Domain.Entities.NombaVirtualAccount", b =>
@@ -500,6 +563,8 @@ namespace AjoCoreBackend.Persistence.Migrations
             modelBuilder.Entity("AjoCoreBackend.Domain.Entities.Trader", b =>
                 {
                     b.Navigation("AdministeredGroups");
+
+                    b.Navigation("GroupMemberships");
 
                     b.Navigation("Transactions");
                 });

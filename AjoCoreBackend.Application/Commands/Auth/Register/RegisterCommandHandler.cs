@@ -17,15 +17,18 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IEmailService _emailService;
 
         public RegisterCommandHandler(
             IUnitOfWork unitOfWork,
             IPasswordHasher passwordHasher,
-            IJwtTokenService jwtTokenService)
+            IJwtTokenService jwtTokenService,
+            IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _passwordHasher = passwordHasher;
             _jwtTokenService = jwtTokenService;
+            _emailService = emailService;
         }
 
         public async Task<AuthResponseDto> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -40,6 +43,7 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
             }
 
             var role = Enum.Parse<UserRole>(request.Role);
+            var verificationToken = Guid.NewGuid().ToString("N");
 
             var trader = new Trader
             {
@@ -48,11 +52,20 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
                 Email = request.Email.ToLower(),
                 PhoneNumber = request.PhoneNumber,
                 PasswordHash = _passwordHasher.HashPassword(request.Password),
-                Role = role
+                Role = role,
+                EmailVerificationToken = verificationToken,
+                IsEmailVerified = false
             };
 
             await _unitOfWork.Repository<Trader>().AddAsync(trader);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // Send Verification Email
+            var verificationLink = $"https://your-frontend-url.com/verify-email?token={verificationToken}&email={trader.Email}";
+            var emailBody = $"<h1>Welcome to AjoCore!</h1><p>Please verify your email by clicking <a href='{verificationLink}'>here</a>.</p><p>Alternatively, use this token: {verificationToken}</p>";
+            
+            // Fire and forget email sending to not block the API response
+            _ = _emailService.SendEmailAsync(trader.Email, "Verify your AjoCore Account", emailBody);
 
             var token = _jwtTokenService.GenerateToken(trader);
             var refreshToken = _jwtTokenService.GenerateRefreshToken();

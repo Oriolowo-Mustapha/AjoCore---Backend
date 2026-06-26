@@ -30,6 +30,10 @@ namespace AjoCoreBackend.Infrastructure.Extensions
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
 
+            // Configure Email Settings
+            services.Configure<AjoCoreBackend.Application.DTOs.Email.EmailSettings>(configuration.GetSection("EmailSettings"));
+            services.AddScoped<IEmailService, SmtpEmailService>();
+
             // Register Background Jobs
             services.AddHostedService<BackgroundJobs.LiquidationSweepService>();
 

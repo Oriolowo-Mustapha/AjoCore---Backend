@@ -4,6 +4,7 @@ using AjoCoreBackend.Application.Commands.Auth.Register;
 using AjoCoreBackend.Application.Commands.Auth.RefreshToken;
 using AjoCoreBackend.Application.Commands.Auth.ForgotPassword;
 using AjoCoreBackend.Application.Commands.Auth.ResetPassword;
+using AjoCoreBackend.Application.Commands.Auth.VerifyEmail;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,6 +26,13 @@ namespace AjoCoreBackend.API.Controllers
         {
             var result = await _mediator.Send(command);
             return Ok(result);
+        }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { Success = result });
         }
 
         [HttpPost("login")]

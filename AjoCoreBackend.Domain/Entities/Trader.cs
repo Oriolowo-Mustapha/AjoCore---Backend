@@ -19,6 +19,9 @@ namespace AjoCoreBackend.Domain.Entities
         
         public string? ResetPasswordToken { get; set; }
         public DateTime? ResetPasswordTokenExpiry { get; set; }
+        
+        public bool IsEmailVerified { get; set; } = false;
+        public string? EmailVerificationToken { get; set; }
 
         // Navigation Properties
         public ICollection<CooperativeGroup> AdministeredGroups { get; set; } = new List<CooperativeGroup>();

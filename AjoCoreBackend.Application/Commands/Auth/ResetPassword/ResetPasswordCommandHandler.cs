@@ -25,22 +25,47 @@ namespace AjoCoreBackend.Application.Commands.Auth.ResetPassword
         {
             var users = await _unitOfWork.Repository<Trader>()
                 .FindAsync(t => t.Email.ToLower() == request.Email.ToLower());
-            
             var trader = users.FirstOrDefault();
 
-            if (trader == null || 
-                trader.ResetPasswordToken != request.Token || 
-                trader.ResetPasswordTokenExpiry == null || 
-                trader.ResetPasswordTokenExpiry < DateTime.UtcNow)
+            var admins = await _unitOfWork.Repository<CooperativeAdmin>()
+                .FindAsync(a => a.Email.ToLower() == request.Email.ToLower());
+            var admin = admins.FirstOrDefault();
+
+            if (trader != null)
+            {
+                if (trader.ResetPasswordToken != request.Token || 
+                    trader.ResetPasswordTokenExpiry == null || 
+                    trader.ResetPasswordTokenExpiry < DateTime.UtcNow)
+                {
+                    throw new DomainException("Invalid or expired reset token.");
+                }
+
+                trader.PasswordHash = _passwordHasher.HashPassword(request.NewPassword);
+                trader.ResetPasswordToken = null;
+                trader.ResetPasswordTokenExpiry = null;
+
+                _unitOfWork.Repository<Trader>().Update(trader);
+            }
+            else if (admin != null)
+            {
+                if (admin.ResetPasswordToken != request.Token || 
+                    admin.ResetPasswordTokenExpiry == null || 
+                    admin.ResetPasswordTokenExpiry < DateTime.UtcNow)
+                {
+                    throw new DomainException("Invalid or expired reset token.");
+                }
+
+                admin.PasswordHash = _passwordHasher.HashPassword(request.NewPassword);
+                admin.ResetPasswordToken = null;
+                admin.ResetPasswordTokenExpiry = null;
+
+                _unitOfWork.Repository<CooperativeAdmin>().Update(admin);
+            }
+            else
             {
                 throw new DomainException("Invalid or expired reset token.");
             }
 
-            trader.PasswordHash = _passwordHasher.HashPassword(request.NewPassword);
-            trader.ResetPasswordToken = null;
-            trader.ResetPasswordTokenExpiry = null;
-
-            _unitOfWork.Repository<Trader>().Update(trader);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return true;

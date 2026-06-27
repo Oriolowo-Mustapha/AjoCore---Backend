@@ -25,27 +25,37 @@ namespace AjoCoreBackend.Application.Commands.Auth.ForgotPassword
         {
             var users = await _unitOfWork.Repository<Trader>()
                 .FindAsync(t => t.Email.ToLower() == request.Email.ToLower());
-            
             var trader = users.FirstOrDefault();
 
-            if (trader == null)
+            var admins = await _unitOfWork.Repository<CooperativeAdmin>()
+                .FindAsync(a => a.Email.ToLower() == request.Email.ToLower());
+            var admin = admins.FirstOrDefault();
+
+            if (trader == null && admin == null)
             {
-                // We shouldn't reveal if a user exists or not, but for a hackathon we might throw or just return a generic success message.
-                // Let's just return a dummy token or throw NotFoundException.
-                throw new NotFoundException($"Trader with email {request.Email} was not found.");
+                throw new NotFoundException($"User with email {request.Email} was not found.");
             }
 
             var resetToken = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper(); // 6 character code for simplicity
             
-            trader.ResetPasswordToken = resetToken;
-            trader.ResetPasswordTokenExpiry = DateTime.UtcNow.AddMinutes(15);
+            if (trader != null)
+            {
+                trader.ResetPasswordToken = resetToken;
+                trader.ResetPasswordTokenExpiry = DateTime.UtcNow.AddMinutes(15);
+                _unitOfWork.Repository<Trader>().Update(trader);
+            }
+            else if (admin != null)
+            {
+                admin.ResetPasswordToken = resetToken;
+                admin.ResetPasswordTokenExpiry = DateTime.UtcNow.AddMinutes(15);
+                _unitOfWork.Repository<CooperativeAdmin>().Update(admin);
+            }
 
-            _unitOfWork.Repository<Trader>().Update(trader);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var emailBody = $"<h1>Password Reset Request</h1><p>Your password reset code is: <strong>{resetToken}</strong></p><p>This code will expire in 15 minutes.</p>";
             
-            _ = _emailService.SendEmailAsync(trader.Email, "AjoCore Password Reset", emailBody);
+            _ = _emailService.SendEmailAsync(request.Email, "AjoCore Password Reset", emailBody);
 
             return resetToken;
         }

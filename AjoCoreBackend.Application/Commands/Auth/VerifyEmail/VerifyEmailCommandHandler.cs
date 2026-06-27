@@ -21,23 +21,45 @@ namespace AjoCoreBackend.Application.Commands.Auth.VerifyEmail
         {
             var users = await _unitOfWork.Repository<Trader>()
                 .FindAsync(t => t.Email.ToLower() == request.Email.ToLower());
-            
             var trader = users.FirstOrDefault();
 
-            if (trader == null || trader.EmailVerificationToken != request.Token)
+            var admins = await _unitOfWork.Repository<CooperativeAdmin>()
+                .FindAsync(a => a.Email.ToLower() == request.Email.ToLower());
+            var admin = admins.FirstOrDefault();
+
+            if (trader != null)
+            {
+                if (trader.EmailVerificationToken != request.Token)
+                {
+                    throw new DomainException("Invalid verification token or email.");
+                }
+
+                if (trader.IsEmailVerified) return true;
+
+                trader.IsEmailVerified = true;
+                trader.EmailVerificationToken = null;
+
+                _unitOfWork.Repository<Trader>().Update(trader);
+            }
+            else if (admin != null)
+            {
+                if (admin.EmailVerificationToken != request.Token)
+                {
+                    throw new DomainException("Invalid verification token or email.");
+                }
+
+                if (admin.IsEmailVerified) return true;
+
+                admin.IsEmailVerified = true;
+                admin.EmailVerificationToken = null;
+
+                _unitOfWork.Repository<CooperativeAdmin>().Update(admin);
+            }
+            else
             {
                 throw new DomainException("Invalid verification token or email.");
             }
 
-            if (trader.IsEmailVerified)
-            {
-                return true; // Already verified
-            }
-
-            trader.IsEmailVerified = true;
-            trader.EmailVerificationToken = null;
-
-            _unitOfWork.Repository<Trader>().Update(trader);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return true;

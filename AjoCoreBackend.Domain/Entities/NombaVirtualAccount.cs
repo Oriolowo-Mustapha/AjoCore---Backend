@@ -11,5 +11,6 @@ namespace AjoCoreBackend.Domain.Entities
         
         // Navigation Properties
         public SavingCycleMember? Member { get; set; }
+
     }
 }

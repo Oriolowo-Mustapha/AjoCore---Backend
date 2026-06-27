@@ -1,6 +1,7 @@
+using AjoCoreBackend.Domain.Entities;
+using AjoCoreBackend.Domain.Enum;
 using System;
 using System.Collections.Generic;
-using AjoCoreBackend.Domain.Enum;
 
 namespace AjoCoreBackend.Domain.Entities
 {
@@ -20,3 +21,4 @@ namespace AjoCoreBackend.Domain.Entities
         public ICollection<PayoutLedger> Payouts { get; set; } = new List<PayoutLedger>();
     }
 }
+

@@ -84,5 +84,42 @@ namespace AjoCoreBackend.API.Controllers
             var result = await _mediator.Send(new GetMemberContributionsQuery { SavingCycleMemberId = memberId });
             return Ok(result);
         }
+
+        /// <summary>
+        /// Approve a member's request to join a saving cycle. Admin only.
+        /// </summary>
+        [Authorize(Roles = "CooperativeAdmin")]
+        [HttpPost("{id}/members/{memberId}/approve")]
+        public async Task<IActionResult> ApproveMember(Guid id, Guid memberId)
+        {
+            await _mediator.Send(new AjoCoreBackend.Application.Commands.SavingCycles.ApproveMember.ApproveCycleMemberCommand { SavingCycleId = id, MemberId = memberId });
+            return Ok(new { status = "Approved" });
+        }
+
+        /// <summary>
+        /// Reject a member's request to join a saving cycle. Admin only.
+        /// </summary>
+        [Authorize(Roles = "CooperativeAdmin")]
+        [HttpPost("{id}/members/{memberId}/reject")]
+        public async Task<IActionResult> RejectMember(Guid id, Guid memberId)
+        {
+            await _mediator.Send(new AjoCoreBackend.Application.Commands.SavingCycles.RejectMember.RejectCycleMemberCommand { SavingCycleId = id, MemberId = memberId });
+            return Ok(new { status = "Rejected" });
+        }
+
+        /// <summary>
+        /// Reorder payout orders for members in a saving cycle before it starts. Admin only.
+        /// </summary>
+        [Authorize(Roles = "CooperativeAdmin")]
+        [HttpPost("{id}/members/reorder")]
+        public async Task<IActionResult> ReorderMembers(Guid id, [FromBody] System.Collections.Generic.List<AjoCoreBackend.Application.Commands.SavingCycles.ReorderMembers.MemberOrderDto> memberOrders)
+        {
+            await _mediator.Send(new AjoCoreBackend.Application.Commands.SavingCycles.ReorderMembers.ReorderCycleMembersCommand 
+            { 
+                SavingCycleId = id, 
+                MemberOrders = memberOrders 
+            });
+            return Ok(new { status = "Reordered successfully" });
+        }
     }
 }

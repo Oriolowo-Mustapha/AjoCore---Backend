@@ -32,6 +32,7 @@ namespace AjoCoreBackend.API.Middlewares
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
+            Console.WriteLine($"[Exception Middleware] {exception}");
             context.Response.ContentType = "application/json";
             
             int statusCode;

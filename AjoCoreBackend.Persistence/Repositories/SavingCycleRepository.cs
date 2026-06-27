@@ -20,6 +20,13 @@ namespace AjoCoreBackend.Persistence.Repositories
                 .FirstOrDefaultAsync(c => c.Id == cycleId);
         }
 
+        public async Task<ICollection<SavingCycle>> GetSavingCycleByIndividualId(Guid UserId)
+        {
+            return await _dbContext.SavingCycles
+                .Where(c => c.IndividualOwnerId == UserId)
+                .ToListAsync();
+        }
+
         public async Task<bool> IsSubAccountLinkedAsync(string subAccountId)
         {
             return await _dbContext.SavingCycles

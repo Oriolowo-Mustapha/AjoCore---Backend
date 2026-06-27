@@ -14,10 +14,14 @@ namespace AjoCoreBackend.Domain.Entities
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public CycleStatus Status { get; set; }
+
+        public Guid? IndividualOwnerId { get; set; }
         public Guid? CooperativeGroupId { get; set; }
         
         // Navigation Properties
         public CooperativeGroup? CooperativeGroup { get; set; }
         public ICollection<SavingCycleMember> Members { get; set; } = new List<SavingCycleMember>();
+
+        public SavingCycleMember? IndividualOwner { get; set; }
     }
 }

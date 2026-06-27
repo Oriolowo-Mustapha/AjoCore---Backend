@@ -14,5 +14,6 @@ namespace AjoCoreBackend.API.Services
         }
 
         public string? UserId => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        public Guid? UserGuid => Guid.TryParse(UserId, out var guid) ? guid : null;
     }
 }

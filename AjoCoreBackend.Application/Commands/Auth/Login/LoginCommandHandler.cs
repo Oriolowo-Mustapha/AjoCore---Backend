@@ -28,38 +28,78 @@ namespace AjoCoreBackend.Application.Commands.Auth.Login
 
         public async Task<AuthResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            var users = await _unitOfWork.Repository<Trader>()
+            BaseEntity userEntity = null;
+            string userEmail = "";
+            string userFullName = "";
+            string userPasswordHash = "";
+            System.Guid userId = System.Guid.Empty;
+            Domain.Enum.UserRole userRole = Domain.Enum.UserRole.Trader;
+
+            var traders = await _unitOfWork.Repository<Trader>()
                 .FindAsync(t => t.Email.ToLower() == request.Email.ToLower());
-            
-            var trader = users.FirstOrDefault();
+            var trader = traders.FirstOrDefault();
 
-            if (trader == null)
+            if (trader != null)
+            {
+                userEntity = trader;
+                userEmail = trader.Email;
+                userFullName = $"{trader.FirstName} {trader.LastName}";
+                userPasswordHash = trader.PasswordHash;
+                userId = trader.Id;
+                userRole = trader.Role;
+            }
+            else
+            {
+                var admins = await _unitOfWork.Repository<CooperativeAdmin>()
+                    .FindAsync(a => a.Email.ToLower() == request.Email.ToLower());
+                var admin = admins.FirstOrDefault();
+
+                if (admin != null)
+                {
+                    userEntity = admin;
+                    userEmail = admin.Email;
+                    userFullName = $"{admin.FirstName} {admin.LastName}";
+                    userPasswordHash = admin.PasswordHash;
+                    userId = admin.Id;
+                    userRole = admin.Role;
+                }
+            }
+
+            if (userEntity == null)
             {
                 throw new InvalidCredentialsException();
             }
 
-            if (!_passwordHasher.VerifyPassword(request.Password, trader.PasswordHash))
+            if (!_passwordHasher.VerifyPassword(request.Password, userPasswordHash))
             {
                 throw new InvalidCredentialsException();
             }
 
-            var token = _jwtTokenService.GenerateToken(trader);
+            var token = _jwtTokenService.GenerateToken(userId.ToString(), userEmail, userRole.ToString(), userFullName);
             var refreshToken = _jwtTokenService.GenerateRefreshToken();
 
-            trader.RefreshToken = refreshToken;
-            trader.RefreshTokenExpiryTime = System.DateTime.UtcNow.AddDays(7); // 7 days expiry
+            if (userEntity is Trader t)
+            {
+                t.RefreshToken = refreshToken;
+                t.RefreshTokenExpiryTime = System.DateTime.UtcNow.AddDays(7);
+                _unitOfWork.Repository<Trader>().Update(t);
+            }
+            else if (userEntity is CooperativeAdmin a)
+            {
+                // To support refresh tokens for admins, we need those fields on CooperativeAdmin.
+                // For now, we will skip saving it or we can add it later if needed.
+            }
 
-            _unitOfWork.Repository<Trader>().Update(trader);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new AuthResponseDto
             {
                 Token = token,
                 RefreshToken = refreshToken,
-                Email = trader.Email,
-                FullName = $"{trader.FirstName} {trader.LastName}",
-                Role = trader.Role.ToString(),
-                UserId = trader.Id
+                Email = userEmail,
+                FullName = userFullName,
+                Role = userRole.ToString(),
+                UserId = userId
             };
         }
     }

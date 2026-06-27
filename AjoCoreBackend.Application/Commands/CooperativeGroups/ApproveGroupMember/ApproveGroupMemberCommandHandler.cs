@@ -43,7 +43,12 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.ApproveGroupMemb
             var group = await _unitOfWork.Repository<CooperativeGroup>()
                 .GetByIdAsync(membership.CooperativeGroupId);
 
-            if (group == null || group.AdminTraderId != adminId)
+            if (group == null)
+            {
+                throw new NotFoundException($"Membership with ID {request.MembershipId} was not found.");
+            }
+
+            if (group.CooperativeAdminId != adminId)
             {
                 throw new ForbiddenAccessException("Only the group admin can approve membership requests.");
             }

@@ -24,7 +24,6 @@ namespace AjoCoreBackend.Domain.Entities
         public string? EmailVerificationToken { get; set; }
 
         // Navigation Properties
-        public ICollection<CooperativeGroup> AdministeredGroups { get; set; } = new List<CooperativeGroup>();
         public ICollection<CooperativeGroupMember> GroupMemberships { get; set; } = new List<CooperativeGroupMember>();
         public ICollection<InboundTransaction> Transactions { get; set; } = new List<InboundTransaction>();
     }

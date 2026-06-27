@@ -26,16 +26,16 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetPendingRequest
 
         public async Task<List<GroupMemberDto>> Handle(GetPendingRequestsQuery request, CancellationToken cancellationToken)
         {
-            var adminId = Guid.Parse(_currentUserService.UserId 
+            var userId = Guid.Parse(_currentUserService.UserId 
                 ?? throw new ForbiddenAccessException("You must be logged in."));
 
             var group = await _unitOfWork.Repository<CooperativeGroup>().GetByIdAsync(request.GroupId);
             if (group == null)
             {
-                throw new NotFoundException($"Group {request.GroupId} not found.");
+                throw new NotFoundException($"Cooperative Group with ID {request.GroupId} was not found.");
             }
 
-            if (group.AdminTraderId != adminId)
+            if (group.CooperativeAdminId != userId)
             {
                 throw new ForbiddenAccessException("Only the group admin can view pending requests.");
             }

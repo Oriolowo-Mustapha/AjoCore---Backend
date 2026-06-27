@@ -27,10 +27,10 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.CreateGroup
                 ?? throw new ForbiddenAccessException("You must be logged in."));
 
             // Verify the user is a CooperativeAdmin
-            var users = await _unitOfWork.Repository<Trader>().FindAsync(t => t.Id == userId);
-            var trader = users.FirstOrDefault();
+            var admins = await _unitOfWork.Repository<CooperativeAdmin>().FindAsync(a => a.Id == userId);
+            var admin = System.Linq.Enumerable.FirstOrDefault(admins);
 
-            if (trader == null || trader.Role != UserRole.CooperativeAdmin)
+            if (admin == null || admin.Role != UserRole.CooperativeAdmin)
             {
                 throw new ForbiddenAccessException("Only Cooperative Admins can create groups.");
             }
@@ -39,7 +39,7 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.CreateGroup
             {
                 Name = request.Name,
                 Description = request.Description,
-                AdminTraderId = userId
+                CooperativeAdminId = userId
             };
 
             await _unitOfWork.Repository<CooperativeGroup>().AddAsync(group);

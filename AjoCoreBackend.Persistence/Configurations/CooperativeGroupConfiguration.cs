@@ -8,14 +8,13 @@ namespace AjoCoreBackend.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<CooperativeGroup> builder)
         {
-            builder.HasKey(c => c.Id);
+            builder.HasKey(x => x.Id);
 
-            builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
-            builder.Property(c => c.Description).HasMaxLength(500);
+            builder.Property(x => x.Name).IsRequired().HasMaxLength(200);
 
-            builder.HasOne(c => c.AdminTrader)
+            builder.HasOne(x => x.CooperativeAdmin)
                 .WithMany(t => t.AdministeredGroups)
-                .HasForeignKey(c => c.AdminTraderId)
+                .HasForeignKey(x => x.CooperativeAdminId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

@@ -15,6 +15,7 @@ namespace AjoCoreBackend.Persistence.Contexts
         public DbSet<ContributionLedger> ContributionLedgers { get; set; } = null!;
         public DbSet<PayoutLedger> PayoutLedgers { get; set; } = null!;
         public DbSet<Trader> Traders { get; set; } = null!;
+        public DbSet<CooperativeAdmin> CooperativeAdmins { get; set; } = null!;
         public DbSet<CooperativeGroup> CooperativeGroups { get; set; } = null!;
         public DbSet<CooperativeGroupMember> CooperativeGroupMembers { get; set; } = null!;
         public DbSet<InboundTransaction> InboundTransactions { get; set; } = null!;

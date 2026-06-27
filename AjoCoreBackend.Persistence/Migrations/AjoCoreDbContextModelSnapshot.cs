@@ -58,13 +58,59 @@ namespace AjoCoreBackend.Persistence.Migrations
                     b.ToTable("ContributionLedgers");
                 });
 
+            modelBuilder.Entity("AjoCoreBackend.Domain.Entities.CooperativeAdmin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("CooperativeAdmins");
+                });
+
             modelBuilder.Entity("AjoCoreBackend.Domain.Entities.CooperativeGroup", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AdminTraderId")
+                    b.Property<Guid>("CooperativeAdminId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -72,20 +118,19 @@ namespace AjoCoreBackend.Persistence.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AdminTraderId");
+                    b.HasIndex("CooperativeAdminId");
 
                     b.ToTable("CooperativeGroups");
                 });
@@ -454,13 +499,13 @@ namespace AjoCoreBackend.Persistence.Migrations
 
             modelBuilder.Entity("AjoCoreBackend.Domain.Entities.CooperativeGroup", b =>
                 {
-                    b.HasOne("AjoCoreBackend.Domain.Entities.Trader", "AdminTrader")
+                    b.HasOne("AjoCoreBackend.Domain.Entities.CooperativeAdmin", "CooperativeAdmin")
                         .WithMany("AdministeredGroups")
-                        .HasForeignKey("AdminTraderId")
+                        .HasForeignKey("CooperativeAdminId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("AdminTrader");
+                    b.Navigation("CooperativeAdmin");
                 });
 
             modelBuilder.Entity("AjoCoreBackend.Domain.Entities.CooperativeGroupMember", b =>
@@ -551,6 +596,11 @@ namespace AjoCoreBackend.Persistence.Migrations
                     b.Navigation("VirtualAccount");
                 });
 
+            modelBuilder.Entity("AjoCoreBackend.Domain.Entities.CooperativeAdmin", b =>
+                {
+                    b.Navigation("AdministeredGroups");
+                });
+
             modelBuilder.Entity("AjoCoreBackend.Domain.Entities.CooperativeGroup", b =>
                 {
                     b.Navigation("Cycles");
@@ -577,8 +627,6 @@ namespace AjoCoreBackend.Persistence.Migrations
 
             modelBuilder.Entity("AjoCoreBackend.Domain.Entities.Trader", b =>
                 {
-                    b.Navigation("AdministeredGroups");
-
                     b.Navigation("GroupMemberships");
 
                     b.Navigation("Transactions");

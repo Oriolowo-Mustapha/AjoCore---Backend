@@ -21,6 +21,11 @@ namespace AjoCoreBackend.Infrastructure.Services
 
         public string GenerateToken(Trader user)
         {
+            return GenerateToken(user.Id.ToString(), user.Email, user.Role.ToString(), $"{user.FirstName} {user.LastName}");
+        }
+
+        public string GenerateToken(string userId, string email, string role, string fullName)
+        {
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"] 
                     ?? throw new InvalidOperationException("JWT Secret not configured.")));
@@ -29,10 +34,10 @@ namespace AjoCoreBackend.Infrastructure.Services
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Name, fullName),
+                new Claim(ClaimTypes.Role, role)
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor

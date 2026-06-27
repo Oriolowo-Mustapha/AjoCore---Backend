@@ -31,13 +31,12 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.RequestJoinGroup
             var group = await _unitOfWork.Repository<CooperativeGroup>().GetByIdAsync(request.GroupId);
             if (group == null)
             {
-                throw new NotFoundException($"Cooperative Group with ID {request.GroupId} was not found.");
+                throw new NotFoundException($"Cooperative group with ID {request.GroupId} not found.");
             }
 
-            // Cannot join your own group as admin
-            if (group.AdminTraderId == userId)
+            if (group.CooperativeAdminId == userId)
             {
-                throw new DomainException("You are already the admin of this group.");
+                throw new DomainException("Admin cannot request to join their own group.");
             }
 
             // Check if already a member or has a pending request

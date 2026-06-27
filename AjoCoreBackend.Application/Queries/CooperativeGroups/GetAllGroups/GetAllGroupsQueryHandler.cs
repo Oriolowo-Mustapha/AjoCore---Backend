@@ -38,7 +38,7 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetAllGroups
 
             foreach (var group in groups)
             {
-                var admin = await _unitOfWork.Repository<Trader>().GetByIdAsync(group.AdminTraderId);
+                var admin = await _unitOfWork.Repository<CooperativeAdmin>().GetByIdAsync(group.CooperativeAdminId);
                 var members = await _unitOfWork.Repository<CooperativeGroupMember>()
                     .FindAsync(m => m.CooperativeGroupId == group.Id && m.Status == ApprovalStatus.Approved);
                 var cycles = await _unitOfWork.Repository<SavingCycle>()
@@ -49,7 +49,7 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetAllGroups
                     Id = group.Id,
                     Name = group.Name,
                     Description = group.Description,
-                    AdminTraderId = group.AdminTraderId,
+                    CooperativeAdminId = group.CooperativeAdminId,
                     AdminName = admin != null ? $"{admin.FirstName} {admin.LastName}" : "Unknown",
                     MemberCount = members.Count(),
                     CycleCount = cycles.Count(),
@@ -59,5 +59,17 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetAllGroups
 
             return result;
         }
+    }
+
+    public class CooperativeGroupDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public Guid CooperativeAdminId { get; set; }
+        public string AdminName { get; set; } = string.Empty;
+        public int MemberCount { get; set; }
+        public int CycleCount { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

@@ -12,6 +12,5 @@ namespace AjoCoreBackend.Application.Commands.IndividualContriution.CreateIndivi
         public decimal ContributionAmount { get; init; }
         public int IntervalDays { get; init; }
         public Guid? CooperativeGroupId { get; init; }
-        public Guid? IndividualOwnerId { get; init; }
     }
 }

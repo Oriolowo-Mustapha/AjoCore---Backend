@@ -1,11 +1,12 @@
-using System.Text;
-using AjoCoreBackend.Application.Interfaces.Services;
 using AjoCoreBackend.API.Services;
-using AjoCoreBackend.Persistence.Extensions;
-using AjoCoreBackend.Infrastructure.Extensions;
 using AjoCoreBackend.Application.Extensions;
+using AjoCoreBackend.Application.Interfaces.Services;
+using AjoCoreBackend.Infrastructure.Extensions;
+using AjoCoreBackend.Persistence.Extensions;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,6 +77,8 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.UseHangfireDashboard("/hangfire");
 
 // Configure the HTTP request pipeline.
 app.UseMiddleware<AjoCoreBackend.API.Middlewares.ExceptionHandlingMiddleware>();

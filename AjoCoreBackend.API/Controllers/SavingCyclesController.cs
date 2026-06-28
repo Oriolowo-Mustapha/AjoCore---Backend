@@ -1,14 +1,15 @@
-using System;
-using System.Threading.Tasks;
 using AjoCoreBackend.Application.Commands.CreateSavingCycle;
+using AjoCoreBackend.Application.Commands.IndividualContriution.CreateIndividualSavingCycle;
 using AjoCoreBackend.Application.Commands.JoinSavingCycle;
 using AjoCoreBackend.Application.Commands.StartSavingCycle;
 using AjoCoreBackend.Application.Queries.GetAllSavingCycles;
-using AjoCoreBackend.Application.Queries.GetSavingCycleById;
 using AjoCoreBackend.Application.Queries.GetMemberContributions;
+using AjoCoreBackend.Application.Queries.GetSavingCycleById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace AjoCoreBackend.API.Controllers
 {
@@ -35,6 +36,12 @@ namespace AjoCoreBackend.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id }, new { id });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> CreateIndividualSavingCycle([FromBody] CreateIndividualSavingCycleHandler command)
+        {
+            var id = await _mediator.Send(command);
+            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        }
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

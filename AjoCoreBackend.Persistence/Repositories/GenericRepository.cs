@@ -29,9 +29,16 @@ namespace AjoCoreBackend.Persistence.Repositories
             return await _dbContext.Set<T>().ToListAsync();
         }
 
-        public async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        public async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
         {
-            return await _dbContext.Set<T>().Where(predicate).ToListAsync();
+            IQueryable<T> query = _dbContext.Set<T>().Where(predicate);
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.ToListAsync();
         }
 
         public async Task AddAsync(T entity)
@@ -48,5 +55,7 @@ namespace AjoCoreBackend.Persistence.Repositories
         {
             _dbContext.Set<T>().Remove(entity);
         }
+
+
     }
 }

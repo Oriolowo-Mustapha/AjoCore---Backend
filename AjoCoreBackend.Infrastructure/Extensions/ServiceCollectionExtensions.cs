@@ -1,6 +1,8 @@
 using System;
 using AjoCoreBackend.Application.Interfaces.Services;
 using AjoCoreBackend.Infrastructure.Services;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,7 +31,7 @@ namespace AjoCoreBackend.Infrastructure.Extensions
             services.AddScoped<IWebhookSignatureValidator, WebhookSignatureValidator>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
-
+            services.AddScoped<IHangfireBackGroundService, HangfireBackgroundService>();
             // Configure Email Settings
             services.Configure<AjoCoreBackend.Application.DTOs.Email.EmailSettings>(configuration.GetSection("EmailSettings"));
             services.AddScoped<IEmailService, SmtpEmailService>();
@@ -37,6 +39,14 @@ namespace AjoCoreBackend.Infrastructure.Extensions
             // Register Background Jobs
             services.AddHostedService<BackgroundJobs.LiquidationSweepService>();
             services.AddHostedService<BackgroundJobs.SavingReminderService>();
+
+            services.AddHangfire(config =>
+            {
+                config.UsePostgreSqlStorage(
+                    configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            services.AddHangfireServer();
 
             return services;
         }

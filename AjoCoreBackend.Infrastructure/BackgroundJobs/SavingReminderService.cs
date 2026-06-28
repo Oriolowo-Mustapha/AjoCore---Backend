@@ -40,6 +40,7 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
             }
         }
 
+
         private async Task ProcessRemindersAsync(CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();

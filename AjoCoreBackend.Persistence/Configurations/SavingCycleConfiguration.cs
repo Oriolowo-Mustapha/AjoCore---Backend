@@ -24,8 +24,6 @@ namespace AjoCoreBackend.Persistence.Configurations
             builder.Property(s => s.NombaSubAccountId)
                 .IsRequired()
                 .HasMaxLength(50);
-            builder.Property(s => s.IndividualOwnerId)
-                .IsRequired(false);
 
            
 

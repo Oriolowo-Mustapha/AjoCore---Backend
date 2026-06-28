@@ -48,7 +48,12 @@ namespace AjoCoreBackend.API.Controllers
             var cycles = await _mediator.Send(new GetAllSavingCyclesQuery());
             return Ok(cycles);
         }
-
+        [HttpGet]
+        public async Task<IActionResult> GetAllIndividualSavingCycles()
+        {
+            var cycles = await _mediator.Send(new GetAllSavingCyclesQuery());
+            return Ok(cycles);
+        }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {

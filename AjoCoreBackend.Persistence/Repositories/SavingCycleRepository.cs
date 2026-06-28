@@ -17,14 +17,13 @@ namespace AjoCoreBackend.Persistence.Repositories
         {
             return await _dbContext.SavingCycles
                 .Include(c => c.Members)
-                .Include(c => c.IndividualOwner)
                 .FirstOrDefaultAsync(c => c.Id == cycleId);
         }
 
         public async Task<ICollection<SavingCycle>> GetSavingCycleByIndividualId(Guid UserId)
         {
             return await _dbContext.SavingCycles
-                .Where(c => c.IndividualOwnerId == UserId)
+                .Where(c => c.Members.Any(m => m.Id == UserId))
                 .ToListAsync();
         }
 

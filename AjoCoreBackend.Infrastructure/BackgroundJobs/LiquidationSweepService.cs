@@ -164,8 +164,8 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
             // For ASCA, we can process payouts for all members at once
             var cycleWithMembers = await unitOfWork.SavingCycles.GetCycleWithMembersAsync(cycle.Id);
             if (cycleWithMembers == null) return;
-            var member = cycleWithMembers.IndividualOwner;
-            if (member.VirtualAccount == null) return;
+            var member = cycleWithMembers.Members.FirstOrDefault();
+            if (member == null || member.VirtualAccount == null) return;
             // Check if we already processed a payout for this member via Idempotent Ref
             var merchantTxRef = $"payout_cycle{cycle.Id:N}_member{member.Id:N}";
             var ledgers = await unitOfWork.Repository<PayoutLedger>().FindAsync(l => l.MerchantTxRef == merchantTxRef);

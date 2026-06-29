@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using AjoCoreBackend.Domain.Enum;
 
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace AjoCoreBackend.Domain.Entities
 {
     public class SavingCycle : BaseEntity
@@ -10,13 +12,14 @@ namespace AjoCoreBackend.Domain.Entities
         public CycleType CycleType { get; set; }
         public decimal ContributionAmount { get; set; }
         public int IntervalDays { get; set; }
+        
+        [NotMapped]
         public decimal IndividualTargetAmount =>
         EndDate == null
          ? 0
          : ContributionAmount *
            (((EndDate.Value - StartDate).Days / IntervalDays) + 1);
 
-        public string NombaSubAccountId { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public CycleStatus Status { get; set; }

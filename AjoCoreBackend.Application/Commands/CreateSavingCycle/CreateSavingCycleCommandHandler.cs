@@ -28,24 +28,15 @@ namespace AjoCoreBackend.Application.Commands.CreateSavingCycle
 
         public async Task<Guid> Handle(CreateSavingCycleCommand request, CancellationToken cancellationToken)
         {
-            // 1. Provision an isolated Nomba sub-account for this cycle's funds
-            var subAccountResponse = await _nombaApiClient.CreateSubAccountAsync(new CreateSubAccountRequest
-            {
-                AccountName = $"AjoCore_Cycle_{request.Name}",
-                Email = $"cycle_{Guid.NewGuid():N}@ajocore.internal"
-            });
-
-            // 2. Parse the cycle type from the string input
+            // 1. Create the Saving Cycle type from the string input
             var cycleType = System.Enum.Parse<CycleType>(request.CycleType, ignoreCase: true);
 
-            // 3. Build the domain entity
             var cycle = new SavingCycle
             {
                 Name = request.Name,
                 CycleType = cycleType,
                 ContributionAmount = request.ContributionAmount,
                 IntervalDays = request.IntervalDays,
-                NombaSubAccountId = subAccountResponse.SubAccountId,
                 Status = CycleStatus.Pending,
                 StartDate = _dateTimeProvider.UtcNow,
                 CooperativeGroupId = request.CooperativeGroupId

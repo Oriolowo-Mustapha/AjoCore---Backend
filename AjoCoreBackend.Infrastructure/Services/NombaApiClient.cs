@@ -39,8 +39,8 @@ namespace AjoCoreBackend.Infrastructure.Services
             await SetAuthorizationHeaderAsync();
             var response = await _httpClient.PostAsJsonAsync("/v1/accounts/virtual", request);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<CreateVirtualAccountResponse>()
-                   ?? new CreateVirtualAccountResponse();
+            var wrapper = await response.Content.ReadFromJsonAsync<NombaApiResponse<CreateVirtualAccountResponse>>();
+            return wrapper?.Data ?? new CreateVirtualAccountResponse();
         }
 
         public async Task<BankLookupResponse> LookupBankAccountAsync(BankLookupRequest request)

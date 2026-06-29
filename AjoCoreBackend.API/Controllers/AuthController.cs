@@ -25,7 +25,7 @@ namespace AjoCoreBackend.API.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterCommand command)
         {
             var result = await _mediator.Send(command);
-            return Ok(result);
+            return Ok(new { Message = result });
         }
 
         [HttpPost("verify-email")]
@@ -60,6 +60,14 @@ namespace AjoCoreBackend.API.Controllers
 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { Success = result });
+        }
+
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Trader")]
+        [HttpPost("update-bvn")]
+        public async Task<IActionResult> UpdateBvn([FromBody] AjoCoreBackend.Application.Commands.Auth.UpdateBvn.UpdateBvnCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(new { Success = result });

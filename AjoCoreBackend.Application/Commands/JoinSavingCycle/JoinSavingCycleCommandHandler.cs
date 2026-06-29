@@ -62,16 +62,18 @@ namespace AjoCoreBackend.Application.Commands.JoinSavingCycle
                 }
             }
 
+            var trader = await _unitOfWork.Repository<Trader>().GetByIdAsync(userId);
+            if (trader == null) throw new NotFoundException($"Trader with ID {userId} not found.");
+
             // Provision a NUBAN Virtual Account attached to the cycle's Nomba Sub-Account
             var virtualAccountResponse = await _nombaApiClient.CreateVirtualAccountAsync(new CreateVirtualAccountRequest
             {
-                SubAccountId = cycle.NombaSubAccountId,
-                AccountReference = $"member_{userId:N}"
+                AccountReference = $"member_{userId:N}",
+                AccountName = $"{trader.FirstName} {trader.LastName} AjoCore"
             });
 
             var virtualAccount = new NombaVirtualAccount
             {
-                SubAccountId = cycle.NombaSubAccountId,
                 AccountNumber = virtualAccountResponse.AccountNumber,
                 BankName = virtualAccountResponse.BankName,
                 AccountName = virtualAccountResponse.AccountName

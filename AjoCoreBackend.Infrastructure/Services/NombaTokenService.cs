@@ -43,6 +43,7 @@ namespace AjoCoreBackend.Infrastructure.Services
 
                 var clientId = _configuration["Nomba:ClientId"];
                 var clientSecret = _configuration["Nomba:ClientSecret"];
+                var accountId = _configuration["Nomba:AccountId"];
 
                 var requestPayload = new
                 {
@@ -51,7 +52,14 @@ namespace AjoCoreBackend.Infrastructure.Services
                     client_secret = clientSecret
                 };
 
-                var response = await _httpClient.PostAsJsonAsync("/v1/auth/token/issue", requestPayload);
+                var request = new HttpRequestMessage(HttpMethod.Post, "/v1/auth/token/issue");
+                if (!string.IsNullOrEmpty(accountId))
+                {
+                    request.Headers.Add("accountId", accountId);
+                }
+                request.Content = JsonContent.Create(requestPayload);
+
+                var response = await _httpClient.SendAsync(request);
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
@@ -60,8 +68,8 @@ namespace AjoCoreBackend.Infrastructure.Services
                 using var doc = JsonDocument.Parse(content);
                 var root = doc.RootElement;
                 
-                // Assuming standard OAuth2 response structure from Nomba
-                if (root.TryGetProperty("access_token", out var accessTokenProp))
+                // Nomba wraps the response in a 'data' object
+                if (root.TryGetProperty("data", out var dataProp) && dataProp.TryGetProperty("access_token", out var accessTokenProp))
                 {
                     _cachedToken = accessTokenProp.GetString();
                     
@@ -71,7 +79,15 @@ namespace AjoCoreBackend.Infrastructure.Services
                     return _cachedToken ?? string.Empty;
                 }
                 
-                throw new Exception("Failed to extract access_token from Nomba response.");
+                // Fallback in case they return it at the root occasionally
+                if (root.TryGetProperty("access_token", out var rootTokenProp))
+                {
+                    _cachedToken = rootTokenProp.GetString();
+                    _tokenExpiry = DateTime.UtcNow.AddMinutes(55);
+                    return _cachedToken ?? string.Empty;
+                }
+                
+                throw new Exception($"Failed to extract access_token from Nomba response. Content: {content}");
             }
             finally
             {

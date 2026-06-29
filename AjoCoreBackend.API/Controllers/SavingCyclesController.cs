@@ -36,19 +36,21 @@ namespace AjoCoreBackend.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id }, new { id });
         }
 
-        [HttpPost]
+        [HttpPost("individual")]
         public async Task<IActionResult> CreateIndividualSavingCycle([FromBody] CreateIndividualSavingCycleHandler command)
         {
             var id = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetById), new { id }, new { id });
         }
+        
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var cycles = await _mediator.Send(new GetAllSavingCyclesQuery());
             return Ok(cycles);
         }
-        [HttpGet]
+        
+        [HttpGet("individual")]
         public async Task<IActionResult> GetAllIndividualSavingCycles()
         {
             var cycles = await _mediator.Send(new GetAllSavingCyclesQuery());

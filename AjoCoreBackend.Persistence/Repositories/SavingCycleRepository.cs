@@ -27,10 +27,5 @@ namespace AjoCoreBackend.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task<bool> IsSubAccountLinkedAsync(string subAccountId)
-        {
-            return await _dbContext.SavingCycles
-                .AnyAsync(c => c.NombaSubAccountId == subAccountId);
-        }
     }
 }

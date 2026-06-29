@@ -86,7 +86,10 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
                     DateOfBirth = request.DateOfBirth,
                     EmailVerificationToken = verificationToken,
                     IsEmailVerified = false,
-                    Bvn = request.Bvn
+                    Bvn = request.Bvn,
+                    PayoutAccountNumber = request.PayoutAccountNumber,
+                    PayoutBankName = request.PayoutBankName,
+                    PayoutAccountName = request.PayoutAccountName
                 };
                 await _unitOfWork.Repository<Trader>().AddAsync(trader);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);

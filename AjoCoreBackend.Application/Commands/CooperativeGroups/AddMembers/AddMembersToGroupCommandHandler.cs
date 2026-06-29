@@ -77,7 +77,10 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.AddMembers
                         Role = UserRole.Trader,
                         DateOfBirth = memberDto.DateOfBirth,
                         IsEmailVerified = true, // Force verified since admin added them
-                        IsKycCompleted = false  // They MUST update their BVN to activate
+                        IsKycCompleted = false,  // They MUST update their BVN to activate
+                        PayoutAccountNumber = memberDto.PayoutAccountNumber,
+                        PayoutBankName = memberDto.PayoutBankName,
+                        PayoutAccountName = memberDto.PayoutAccountName
                     };
 
                     await _unitOfWork.Repository<Trader>().AddAsync(trader);

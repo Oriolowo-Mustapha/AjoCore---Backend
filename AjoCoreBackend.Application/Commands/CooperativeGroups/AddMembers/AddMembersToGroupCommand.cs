@@ -17,5 +17,8 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.AddMembers
         public string Email { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
+        public string? PayoutAccountNumber { get; set; }
+        public string? PayoutBankName { get; set; }
+        public string? PayoutAccountName { get; set; }
     }
 }

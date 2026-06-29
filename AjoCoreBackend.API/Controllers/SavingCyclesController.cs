@@ -63,6 +63,21 @@ namespace AjoCoreBackend.API.Controllers
             return Ok(cycle);
         }
 
+        [HttpGet("my-personal")]
+        public async Task<IActionResult> GetMyPersonalCycles()
+        {
+            var cycles = await _mediator.Send(new AjoCoreBackend.Application.Queries.GetMyPersonalCycles.GetMyPersonalCyclesQuery());
+            return Ok(cycles);
+        }
+
+        [HttpPost("{id}/liquidate-early")]
+        public async Task<IActionResult> LiquidateEarly(Guid id)
+        {
+            var command = new AjoCoreBackend.Application.Commands.IndividualContriution.LiquidateEarly.LiquidateEarlyCommand { SavingCycleId = id };
+            await _mediator.Send(command);
+            return Ok(new { status = "Liquidated successfully", message = "A 5% penalty has been applied and your payout is being processed." });
+        }
+
         /// <summary>
         /// Trader requests to join a saving cycle.
         /// </summary>

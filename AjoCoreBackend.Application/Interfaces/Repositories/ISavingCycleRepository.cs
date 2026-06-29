@@ -8,6 +8,5 @@ namespace AjoCoreBackend.Application.Interfaces.Repositories
     {
         Task<SavingCycle?> GetCycleWithMembersAsync(Guid cycleId);
         Task<ICollection<SavingCycle>> GetSavingCycleByIndividualId(Guid UserId);
-        Task<bool> IsSubAccountLinkedAsync(string subAccountId);
     }
 }

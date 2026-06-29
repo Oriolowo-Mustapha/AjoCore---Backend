@@ -17,13 +17,7 @@ namespace AjoCoreBackend.Persistence.Configurations
             builder.Property(s => s.ContributionAmount)
                 .IsRequired()
                 .HasColumnType("numeric(18,2)");
-            builder.Property(s => s.IndividualTargetAmount)
-                .IsRequired()
-                .HasColumnType("numeric(18,2)");
-
-            builder.Property(s => s.NombaSubAccountId)
-                .IsRequired()
-                .HasMaxLength(50);
+            builder.Ignore(s => s.IndividualTargetAmount);
 
            
 

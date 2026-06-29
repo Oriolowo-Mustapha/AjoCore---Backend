@@ -13,6 +13,7 @@ namespace AjoCoreBackend.Domain.Entities
         public string PasswordHash { get; set; } = string.Empty;
         public UserRole Role { get; set; } = UserRole.Trader;
         public string? Bvn { get; set; }
+        public bool IsKycCompleted { get; set; } = false;
         public DateTime DateOfBirth { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }

@@ -12,9 +12,13 @@ namespace AjoCoreBackend.Domain.Entities
         public string PhoneNumber { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
         public UserRole Role { get; set; } = UserRole.CooperativeAdmin;
-        
+
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
+
         public bool IsEmailVerified { get; set; } = false;
         public string? EmailVerificationToken { get; set; }
+
         public string? ResetPasswordToken { get; set; }
         public DateTime? ResetPasswordTokenExpiry { get; set; }
 

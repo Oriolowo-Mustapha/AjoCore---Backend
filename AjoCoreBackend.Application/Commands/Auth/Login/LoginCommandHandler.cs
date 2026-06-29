@@ -86,8 +86,9 @@ namespace AjoCoreBackend.Application.Commands.Auth.Login
             }
             else if (userEntity is CooperativeAdmin a)
             {
-                // To support refresh tokens for admins, we need those fields on CooperativeAdmin.
-                // For now, we will skip saving it or we can add it later if needed.
+                a.RefreshToken = refreshToken;
+                a.RefreshTokenExpiryTime = System.DateTime.UtcNow.AddDays(7);
+                _unitOfWork.Repository<CooperativeAdmin>().Update(a);
             }
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);

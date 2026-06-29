@@ -99,5 +99,35 @@ namespace AjoCoreBackend.API.Controllers
             var result = await _mediator.Send(new GetGroupMembersQuery { GroupId = groupId });
             return Ok(result);
         }
+        /// <summary>
+        /// Admin generates an invite link for traders to join the group.
+        /// </summary>
+        [Authorize(Roles = "CooperativeAdmin")]
+        [HttpGet("{groupId}/invite-link")]
+        public async Task<IActionResult> GenerateInviteLink(Guid groupId, [FromQuery] string baseUrl = "https://your-frontend.com")
+        {
+            var inviteLink = await _mediator.Send(new Application.Queries.CooperativeGroups.GenerateInviteLink.GenerateInviteLinkQuery 
+            { 
+                GroupId = groupId,
+                BaseUrl = baseUrl
+            });
+            return Ok(new { inviteLink });
+        }
+
+        /// <summary>
+        /// Admin adds members directly to the group (single or batch).
+        /// </summary>
+        [Authorize(Roles = "CooperativeAdmin")]
+        [HttpPost("{groupId}/members/add")]
+        public async Task<IActionResult> AddMembers(Guid groupId, [FromBody] System.Collections.Generic.List<AjoCoreBackend.Application.Commands.CooperativeGroups.AddMembers.AddGroupMemberDto> members)
+        {
+            var command = new AjoCoreBackend.Application.Commands.CooperativeGroups.AddMembers.AddMembersToGroupCommand
+            {
+                GroupId = groupId,
+                Members = members
+            };
+            var result = await _mediator.Send(command);
+            return Ok(new { status = "Processed", results = result });
+        }
     }
 }

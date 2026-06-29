@@ -38,29 +38,54 @@ namespace AjoCoreBackend.Application.Commands.Auth.RefreshToken
             }
 
             var trader = await _unitOfWork.Repository<Trader>().GetByIdAsync(userId);
+            var cooperativeAdmin = await _unitOfWork.Repository<CooperativeAdmin>().GetByIdAsync(userId);
 
-            if (trader == null || trader.RefreshToken != request.RefreshToken || trader.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            if (trader == null && cooperativeAdmin == null)
             {
                 throw new InvalidCredentialsException();
+            }
+
+            if (trader != null)
+            {
+                if (trader.RefreshToken != request.RefreshToken || trader.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                {
+                    throw new InvalidCredentialsException();
+                }
+            }
+            else if (cooperativeAdmin != null)
+            {
+                if (cooperativeAdmin.RefreshToken != request.RefreshToken || cooperativeAdmin.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                {
+                    throw new InvalidCredentialsException();
+                }
             }
 
             var newAccessToken = _jwtTokenService.GenerateToken(trader);
             var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
 
-            trader.RefreshToken = newRefreshToken;
-            trader.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            if (trader != null)
+            {
+                trader.RefreshToken = newRefreshToken;
+                trader.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+                _unitOfWork.Repository<Trader>().Update(trader);
+            }
+            else if (cooperativeAdmin != null)
+            {
+                cooperativeAdmin.RefreshToken = newRefreshToken;
+                cooperativeAdmin.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+                _unitOfWork.Repository<CooperativeAdmin>().Update(cooperativeAdmin);
+            }
 
-            _unitOfWork.Repository<Trader>().Update(trader);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new AuthResponseDto
             {
                 Token = newAccessToken,
                 RefreshToken = newRefreshToken,
-                Email = trader.Email,
-                FullName = $"{trader.FirstName} {trader.LastName}",
-                Role = trader.Role.ToString(),
-                UserId = trader.Id
+                Email = trader?.Email ?? cooperativeAdmin.Email,
+                FullName = $"{trader?.FirstName ?? cooperativeAdmin.FirstName} {trader?.LastName ?? cooperativeAdmin.LastName}",
+                Role = trader?.Role.ToString() ?? cooperativeAdmin.Role.ToString(),
+                UserId = trader?.Id ?? cooperativeAdmin.Id
             };
         }
     }

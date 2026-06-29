@@ -1,5 +1,17 @@
 namespace AjoCoreBackend.Application.DTOs.Nomba
 {
+    public record NombaApiResponse<T>
+    {
+        [System.Text.Json.Serialization.JsonPropertyName("code")]
+        public string Code { get; init; } = string.Empty;
+
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        public string Description { get; init; } = string.Empty;
+
+        [System.Text.Json.Serialization.JsonPropertyName("data")]
+        public T? Data { get; init; }
+    }
+
     // Sub-Account Models
     public record CreateSubAccountRequest
     {
@@ -17,15 +29,29 @@ namespace AjoCoreBackend.Application.DTOs.Nomba
     // Virtual Account Models
     public record CreateVirtualAccountRequest
     {
-        public string SubAccountId { get; init; } = string.Empty;
+        [System.Text.Json.Serialization.JsonPropertyName("accountRef")]
         public string AccountReference { get; init; } = string.Empty;
+
+        [System.Text.Json.Serialization.JsonPropertyName("accountName")]
+        public string AccountName { get; init; } = string.Empty;
+
+        [System.Text.Json.Serialization.JsonPropertyName("currency")]
         public string Currency { get; init; } = "NGN";
+
+        [System.Text.Json.Serialization.JsonPropertyName("bvn")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Bvn { get; init; }
     }
 
     public record CreateVirtualAccountResponse
     {
+        [System.Text.Json.Serialization.JsonPropertyName("bankAccountNumber")]
         public string AccountNumber { get; init; } = string.Empty;
+
+        [System.Text.Json.Serialization.JsonPropertyName("bankName")]
         public string BankName { get; init; } = string.Empty;
+
+        [System.Text.Json.Serialization.JsonPropertyName("bankAccountName")]
         public string AccountName { get; init; } = string.Empty;
     }
 

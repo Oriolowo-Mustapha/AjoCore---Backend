@@ -80,6 +80,16 @@ var app = builder.Build();
 
 app.UseHangfireDashboard("/hangfire");
 
+RecurringJob.AddOrUpdate<AjoCoreBackend.Infrastructure.BackgroundJobs.LiquidationSweepService>(
+    "liquidation-sweep",
+    service => service.ProcessLiquidationsAsync(),
+    Cron.Daily); // Or Cron.Minutely for testing
+
+RecurringJob.AddOrUpdate<AjoCoreBackend.Infrastructure.BackgroundJobs.SavingReminderService>(
+    "saving-reminders",
+    service => service.ProcessRemindersAsync(),
+    Cron.Daily);
+
 // Configure the HTTP request pipeline.
 app.UseMiddleware<AjoCoreBackend.API.Middlewares.ExceptionHandlingMiddleware>();
 

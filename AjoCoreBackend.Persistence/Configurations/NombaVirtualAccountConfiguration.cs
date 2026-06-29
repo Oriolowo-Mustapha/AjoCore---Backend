@@ -10,10 +10,6 @@ namespace AjoCoreBackend.Persistence.Configurations
         {
             builder.HasKey(n => n.Id);
 
-            builder.Property(n => n.SubAccountId)
-                .IsRequired()
-                .HasMaxLength(50);
-
             builder.Property(n => n.AccountNumber)
                 .HasMaxLength(20);
 

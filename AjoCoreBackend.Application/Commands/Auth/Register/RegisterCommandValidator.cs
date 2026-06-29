@@ -28,6 +28,18 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
             RuleFor(x => x.Role)
                 .Must(r => r == "Trader" || r == "CooperativeAdmin")
                 .WithMessage("Role must be either 'Trader' or 'CooperativeAdmin'.");
+
+            RuleFor(x => x.DateOfBirth)
+                .NotEmpty().WithMessage("Date of Birth is required.")
+                .Must(BeAtLeast18YearsOld).WithMessage("You must be at least 18 years old to register.");
+        }
+
+        private bool BeAtLeast18YearsOld(System.DateTime dateOfBirth)
+        {
+            var today = System.DateTime.Today;
+            var age = today.Year - dateOfBirth.Year;
+            if (dateOfBirth.Date > today.AddYears(-age)) age--;
+            return age >= 18;
         }
     }
 }

@@ -14,16 +14,26 @@ namespace AjoCoreBackend.Infrastructure.Extensions
         {
             var nombaBaseUrl = configuration["Nomba:BaseUrl"] ?? "https://sandbox.api.nomba.com";
 
+            // Register the Logging Handler
+            services.AddTransient<LoggingDelegatingHandler>();
+
             // Register Nomba API Clients
             services.AddHttpClient<INombaTokenService, NombaTokenService>(client =>
             {
                 client.BaseAddress = new Uri(nombaBaseUrl);
-            });
+            })
+            .AddHttpMessageHandler<LoggingDelegatingHandler>();
 
             services.AddHttpClient<INombaApiClient, NombaApiClient>(client =>
             {
                 client.BaseAddress = new Uri(nombaBaseUrl);
-            });
+                var accountId = configuration["Nomba:AccountId"];
+                if (!string.IsNullOrEmpty(accountId))
+                {
+                    client.DefaultRequestHeaders.Add("accountId", accountId);
+                }
+            })
+            .AddHttpMessageHandler<LoggingDelegatingHandler>();
 
             // Register Internal Services
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
@@ -36,14 +46,16 @@ namespace AjoCoreBackend.Infrastructure.Extensions
             services.Configure<AjoCoreBackend.Application.DTOs.Email.EmailSettings>(configuration.GetSection("EmailSettings"));
             services.AddScoped<IEmailService, SmtpEmailService>();
 
-            // Register Background Jobs
-            services.AddHostedService<BackgroundJobs.LiquidationSweepService>();
-            services.AddHostedService<BackgroundJobs.SavingReminderService>();
+            // Register Background Jobs as Transient for Hangfire
+            services.AddTransient<BackgroundJobs.LiquidationSweepService>();
+            services.AddTransient<BackgroundJobs.SavingReminderService>();
 
             services.AddHangfire(config =>
             {
-                config.UsePostgreSqlStorage(
-                    configuration.GetConnectionString("DefaultConnection"));
+                config.UsePostgreSqlStorage(options => 
+                {
+                    options.UseNpgsqlConnection(configuration.GetConnectionString("DefaultConnection"));
+                });
             });
 
             services.AddHangfireServer();

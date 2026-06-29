@@ -7,6 +7,9 @@ using AjoCoreBackend.Application.Commands.Auth.ResetPassword;
 using AjoCoreBackend.Application.Commands.Auth.VerifyEmail;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using AjoCoreBackend.Application.Commands.Auth.UpdateBvn;
+using AjoCoreBackend.Application.Commands.Auth.UpdatePayoutAccount;
 
 namespace AjoCoreBackend.API.Controllers
 {
@@ -65,9 +68,17 @@ namespace AjoCoreBackend.API.Controllers
             return Ok(new { Success = result });
         }
 
-        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Trader")]
+        [Authorize(Roles = "Trader")]
         [HttpPost("update-bvn")]
-        public async Task<IActionResult> UpdateBvn([FromBody] AjoCoreBackend.Application.Commands.Auth.UpdateBvn.UpdateBvnCommand command)
+        public async Task<IActionResult> UpdateBvn([FromBody] UpdateBvnCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { Success = result });
+        }
+
+        [Authorize]
+        [HttpPut("payout-account")]
+        public async Task<IActionResult> UpdatePayoutAccount([FromBody] UpdatePayoutAccountCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(new { Success = result });

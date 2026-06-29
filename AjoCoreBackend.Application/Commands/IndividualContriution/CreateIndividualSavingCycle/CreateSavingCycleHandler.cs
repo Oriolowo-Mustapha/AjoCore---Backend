@@ -28,7 +28,8 @@ namespace AjoCoreBackend.Application.Commands.IndividualContriution.CreateIndivi
                 IntervalDays = request.IntervalDays,
                 Status = CycleStatus.Pending,
                 StartDate = _dateTimeProvider.UtcNow,
-                CooperativeGroupId = request.CooperativeGroupId,
+                EndDate = request.EndDate,
+                CooperativeGroupId = savingCyleType == CycleType.Personal ? null : request.CooperativeGroupId,
             };
 
             var userId = _currentUser.UserGuid ?? throw new KeyNotFoundException($"Current user with ID {_currentUser.UserId} not found");

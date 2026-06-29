@@ -13,5 +13,8 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
         public string Role { get; init; } = "Trader"; // "Trader" or "CooperativeAdmin"
         public string? Bvn { get; init; }
         public DateTime DateOfBirth { get; init; }
+        public string? PayoutAccountNumber { get; init; }
+        public string? PayoutBankName { get; init; }
+        public string? PayoutAccountName { get; init; }
     }
 }

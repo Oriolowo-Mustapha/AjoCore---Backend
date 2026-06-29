@@ -15,6 +15,7 @@ namespace AjoCoreBackend.Infrastructure.Services
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         
         private Dictionary<string, string>? _bankCodesCache;
+        private List<AjoCoreBackend.Application.DTOs.Nomba.BankDto>? _rawBanksCache;
 
         public BankCodeService(INombaApiClient nombaApiClient, ILogger<BankCodeService> logger)
         {
@@ -54,6 +55,12 @@ namespace AjoCoreBackend.Infrastructure.Services
             return string.Empty;
         }
 
+        public async Task<IEnumerable<AjoCoreBackend.Application.DTOs.Nomba.BankDto>> GetAllBanksAsync()
+        {
+            await EnsureCacheInitializedAsync();
+            return _rawBanksCache ?? Enumerable.Empty<AjoCoreBackend.Application.DTOs.Nomba.BankDto>();
+        }
+
         private async Task EnsureCacheInitializedAsync()
         {
             if (_bankCodesCache != null)
@@ -74,8 +81,9 @@ namespace AjoCoreBackend.Infrastructure.Services
                 var response = await _nombaApiClient.FetchBanksAsync();
                 
                 _bankCodesCache = new Dictionary<string, string>();
+                _rawBanksCache = response.Data ?? new List<AjoCoreBackend.Application.DTOs.Nomba.BankDto>();
                 
-                foreach (var bank in response.Data)
+                foreach (var bank in _rawBanksCache)
                 {
                     if (!string.IsNullOrWhiteSpace(bank.Name) && !string.IsNullOrWhiteSpace(bank.Code))
                     {

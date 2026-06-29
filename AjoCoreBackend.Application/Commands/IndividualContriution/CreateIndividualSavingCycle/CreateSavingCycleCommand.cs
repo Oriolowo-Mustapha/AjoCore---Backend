@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,5 +12,6 @@ namespace AjoCoreBackend.Application.Commands.IndividualContriution.CreateIndivi
         public decimal ContributionAmount { get; init; }
         public int IntervalDays { get; init; }
         public Guid? CooperativeGroupId { get; init; }
+        public DateTime? EndDate { get; init; }
     }
 }

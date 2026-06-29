@@ -15,6 +15,11 @@ namespace AjoCoreBackend.Domain.Entities
         public string? Bvn { get; set; }
         public bool IsKycCompleted { get; set; } = false;
         public DateTime DateOfBirth { get; set; }
+        
+        public string? PayoutAccountNumber { get; set; }
+        public string? PayoutBankName { get; set; }
+        public string? PayoutAccountName { get; set; }
+        
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }
         

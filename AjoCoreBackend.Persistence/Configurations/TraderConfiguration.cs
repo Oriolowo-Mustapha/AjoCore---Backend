@@ -14,6 +14,10 @@ namespace AjoCoreBackend.Persistence.Configurations
             builder.Property(x => x.PasswordHash).IsRequired();
             builder.Property(x => x.FirstName).IsRequired().HasMaxLength(100);
             builder.Property(x => x.LastName).IsRequired().HasMaxLength(100);
+
+            builder.Property(x => x.PayoutAccountNumber).HasMaxLength(20);
+            builder.Property(x => x.PayoutBankName).HasMaxLength(100);
+            builder.Property(x => x.PayoutAccountName).HasMaxLength(150);
         }
     }
 }

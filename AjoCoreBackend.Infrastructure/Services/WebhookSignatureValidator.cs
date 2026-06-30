@@ -22,9 +22,9 @@ namespace AjoCoreBackend.Infrastructure.Services
 
             using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_clientSecret));
             var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
-            var hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            var hashString = Convert.ToBase64String(hash);
 
-            return hashString.Equals(signatureHeader, StringComparison.OrdinalIgnoreCase);
+            return hashString.Equals(signatureHeader);
         }
     }
 }

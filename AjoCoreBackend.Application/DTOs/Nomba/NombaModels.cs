@@ -64,6 +64,7 @@ namespace AjoCoreBackend.Application.DTOs.Nomba
 
     public record BankLookupResponse
     {
+        [System.Text.Json.Serialization.JsonPropertyName("accountName")]
         public string AccountName { get; init; } = string.Empty;
     }
 

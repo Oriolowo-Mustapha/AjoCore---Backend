@@ -48,8 +48,8 @@ namespace AjoCoreBackend.Infrastructure.Services
             await SetAuthorizationHeaderAsync();
             var response = await _httpClient.PostAsJsonAsync("/v1/transfers/bank/lookup", request);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<BankLookupResponse>()
-                   ?? new BankLookupResponse();
+            var wrapper = await response.Content.ReadFromJsonAsync<NombaApiResponse<BankLookupResponse>>();
+            return wrapper?.Data ?? new BankLookupResponse();
         }
 
         public async Task<BankTransferResponse> ExecuteBankTransferAsync(BankTransferRequest request)

@@ -23,6 +23,17 @@ namespace AjoCoreBackend.Persistence.Repositories
         {
             return await _dbContext.Set<T>().FindAsync(id);
         }
+        public async Task<T?> GetByIdAsync(Guid id, params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbContext.Set<T>().AsQueryable();
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.FirstOrDefaultAsync(x => x.Id == id);
+        }
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
         {

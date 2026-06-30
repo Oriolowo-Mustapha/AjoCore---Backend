@@ -7,6 +7,7 @@ namespace AjoCoreBackend.Application.Interfaces.Services
 {
     public interface IHangfireBackGroundService
     {
-        public void ScheduleTask<T>(Expression<Func<T, Task>> methodCall, DateTime scheduleAt);
+      void ScheduleTask<T>(Expression<Func<T, Task>> methodCall, DateTime scheduleAt);
+      void EnqueTask<T>(Expression<Func<T, Task>> method);
     }
 }

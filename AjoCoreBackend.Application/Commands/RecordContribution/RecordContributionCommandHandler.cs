@@ -1,10 +1,8 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+
 using AjoCoreBackend.Application.Interfaces.Repositories;
 using AjoCoreBackend.Application.Interfaces.Services;
 using AjoCoreBackend.Domain.Entities;
+using AjoCoreBackend.Domain.Enum;
 using AjoCoreBackend.Domain.Exceptions;
 using MediatR;
 
@@ -14,13 +12,17 @@ namespace AjoCoreBackend.Application.Commands.RecordContribution
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly IHangfireBackGroundService _hangfireService;
+        private readonly IReversalProcessingService _reversalProcessingService;
 
         public RecordContributionCommandHandler(
             IUnitOfWork unitOfWork,
-            IDateTimeProvider dateTimeProvider)
+            IDateTimeProvider dateTimeProvider,
+            IHangfireBackGroundService hangfireService)
         {
             _unitOfWork = unitOfWork;
             _dateTimeProvider = dateTimeProvider;
+            _hangfireService = hangfireService;
         }
 
         public async Task<Guid> Handle(RecordContributionCommand request, CancellationToken cancellationToken)
@@ -56,7 +58,19 @@ namespace AjoCoreBackend.Application.Commands.RecordContribution
 
             if (amountInNaira < cycle.ContributionAmount)
             {
-                throw new InsufficientContributionException(cycle.ContributionAmount, amountInNaira);
+                var reversal = new ReversalLedger
+                {
+                    SavingCycleMemberId = member.Id,
+                    Amount = amountInNaira,
+                    OriginalWebhookRequestId = request.WebhookRequestId,
+                    ReversalTxRef = $"rev_web_{request.WebhookRequestId}",
+                    Status = TransactionStatus.Pending,
+                    TriggeredAt = _dateTimeProvider.UtcNow
+                };
+
+                await _unitOfWork.Repository<ReversalLedger>().AddAsync(reversal);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                _hangfireService.EnqueTask<IReversalProcessingService>(x => x.ProcessPendingReversalsAsync(reversal.Id));
             }
 
             // 5. Record Ledger Entry

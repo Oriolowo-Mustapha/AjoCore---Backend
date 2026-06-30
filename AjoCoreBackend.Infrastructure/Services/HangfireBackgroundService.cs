@@ -14,5 +14,10 @@ namespace AjoCoreBackend.Infrastructure.Services
              BackgroundJob.Schedule<T>(methodCall, scheduleAt);
 
         }
+
+        public void EnqueTask<T>(Expression<Func<T,Task>> method)
+        {
+            BackgroundJob.Enqueue<T>(method);
+        }
     }
 }

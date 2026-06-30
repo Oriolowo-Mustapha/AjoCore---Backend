@@ -13,3 +13,7 @@ namespace AjoCoreBackend.Domain.Entities
         public SavingCycleMember Member { get; set; } = null!;
     }
 }
+
+ 
+
+  

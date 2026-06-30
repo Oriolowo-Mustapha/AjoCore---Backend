@@ -14,4 +14,16 @@ namespace AjoCoreBackend.Domain.Exceptions
             MaxMembers = maxMembers;
         }
     }
+    public class UserBankDetailNotFoundExcepion : DomainException
+    {
+        public Guid TraderId { get; }
+        public string TraderName { get; }
+
+        public UserBankDetailNotFoundExcepion(Guid traderId, string traderName)
+            : base($"This user's personal account details is not found {traderName}")
+        {
+            TraderId = traderId;
+            TraderName = traderName;
+        }
+    }
 }

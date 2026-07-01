@@ -68,7 +68,7 @@ namespace AjoCoreBackend.Application.Commands.JoinSavingCycle
             // Provision a NUBAN Virtual Account attached to the cycle's Nomba Sub-Account
             var virtualAccountResponse = await _nombaApiClient.CreateVirtualAccountAsync(new CreateVirtualAccountRequest
             {
-                AccountReference = $"member_{userId:N}",
+                AccountReference = $"mem_{Guid.NewGuid():N}",
                 AccountName = $"{trader.FirstName} {trader.LastName} AjoCore"
             });
 

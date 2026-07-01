@@ -1,30 +1,28 @@
-using System;
-using System.Linq;
+using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using AjoCoreBackend.Application.DTOs;
 using AjoCoreBackend.Application.Interfaces.Repositories;
 using AjoCoreBackend.Application.Interfaces.Services;
+using AjoCoreBackend.Domain.Entities;
+using AjoCoreBackend.Application.DTOs;
+using System;
+using System.Linq;
 using AjoCoreBackend.Domain.Exceptions;
-using AutoMapper;
-using MediatR;
 
 namespace AjoCoreBackend.Application.Queries.GetMyCycleDetails
 {
-    public class GetMyCycleDetailsQueryHandler : IRequestHandler<GetMyCycleDetailsQuery, SavingCycleDto>
+    public class GetMyCycleDetailsQueryHandler : IRequestHandler<GetMyCycleDetailsQuery, MyCycleDetailsDto>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUserService;
 
-        public GetMyCycleDetailsQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
+        public GetMyCycleDetailsQueryHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
             _currentUserService = currentUserService;
         }
 
-        public async Task<SavingCycleDto> Handle(GetMyCycleDetailsQuery request, CancellationToken cancellationToken)
+        public async Task<MyCycleDetailsDto> Handle(GetMyCycleDetailsQuery request, CancellationToken cancellationToken)
         {
             var userIdString = _currentUserService.UserId;
             if (!Guid.TryParse(userIdString, out Guid userId))
@@ -32,22 +30,41 @@ namespace AjoCoreBackend.Application.Queries.GetMyCycleDetails
                 throw new UnauthorizedAccessException("User is not authenticated properly.");
             }
 
-            var cycle = await _unitOfWork.SavingCycles.GetCycleWithMembersAsync(request.SavingCycleId);
-
+            var cycle = await _unitOfWork.SavingCycles.GetByIdAsync(request.SavingCycleId);
             if (cycle == null)
             {
-                throw new NotFoundException($"Saving Cycle with ID {request.SavingCycleId} was not found.");
+                throw new NotFoundException($"Cycle with ID {request.SavingCycleId} not found.");
             }
 
-            // Filter members to ONLY include the logged-in user before mapping
-            cycle.Members = cycle.Members.Where(m => m.UserId == userId).ToList();
-
-            if (!cycle.Members.Any())
+            if (!cycle.CycleType.ToString().Equals(request.ExpectedCycleType, StringComparison.OrdinalIgnoreCase))
             {
-                throw new ForbiddenAccessException("You are not a member of this saving cycle.");
+                throw new InvalidOperationException($"This endpoint is only for {request.ExpectedCycleType} cycles.");
             }
 
-            return _mapper.Map<SavingCycleDto>(cycle);
+            var members = await _unitOfWork.Repository<SavingCycleMember>().FindAsync(m => m.SavingCycleId == cycle.Id && m.UserId == userId);
+            var member = members.FirstOrDefault();
+
+            if (member == null)
+            {
+                throw new NotFoundException("You are not a member of this saving cycle.");
+            }
+
+            var vAccount = await _unitOfWork.Repository<NombaVirtualAccount>().GetByIdAsync(member.NombaVirtualAccountId);
+
+            return new MyCycleDetailsDto
+            {
+                CycleId = cycle.Id,
+                Name = cycle.Name,
+                CycleType = cycle.CycleType.ToString(),
+                ContributionAmount = cycle.ContributionAmount,
+                IntervalDays = cycle.IntervalDays,
+                Status = cycle.Status.ToString(),
+                StartDate = cycle.StartDate,
+                EndDate = cycle.EndDate,
+                VirtualAccountNumber = vAccount?.AccountNumber,
+                VirtualAccountBank = vAccount?.BankName,
+                PayoutOrder = member.PayoutOrder
+            };
         }
     }
 }

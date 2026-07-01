@@ -3,6 +3,7 @@ using System;
 using AjoCoreBackend.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AjoCoreBackend.Persistence.Migrations
 {
     [DbContext(typeof(AjoCoreDbContext))]
-    partial class AjoCoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260701155530_AddSystemAdminsTable")]
+    partial class AddSystemAdminsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -535,7 +538,7 @@ namespace AjoCoreBackend.Persistence.Migrations
                             Email = "baseapha@gmail.com",
                             FirstName = "Oriolowo",
                             LastName = "Mustapha",
-                            PasswordHash = "$2a$12$smqy6Q9xGlXerUxW.AV1YuKeNBCsTwVfap/uqw9EvmnsGsWRq4oTi",
+                            PasswordHash = "HASH_PLACEHOLDER",
                             Role = 2,
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Username = "apha"
@@ -547,7 +550,7 @@ namespace AjoCoreBackend.Persistence.Migrations
                             Email = "adeyemiadigun12@gmail.com",
                             FirstName = "Adeyemi",
                             LastName = "Mubarak",
-                            PasswordHash = "$2a$12$5TN4fUTIeV2KyeUdA0geAeqaQkuhbB2M9q.plC3n48PBLm3fx/ECS",
+                            PasswordHash = "HASH_PLACEHOLDER",
                             Role = 2,
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Username = "ghost"

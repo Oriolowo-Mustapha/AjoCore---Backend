@@ -37,7 +37,7 @@ namespace AjoCoreBackend.API.Controllers
         }
 
         [HttpPost("individual")]
-        public async Task<IActionResult> CreateIndividualSavingCycle([FromBody] CreateIndividualSavingCycleHandler command)
+        public async Task<IActionResult> CreateIndividualSavingCycle([FromBody] CreateIndividualSavingCycleCommand command)
         {
             var id = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetById), new { id }, new { id });
@@ -56,6 +56,35 @@ namespace AjoCoreBackend.API.Controllers
             var cycles = await _mediator.Send(new GetAllSavingCyclesQuery());
             return Ok(cycles);
         }
+        [HttpGet("personal/{id}")]
+        public async Task<IActionResult> GetPersonalCycleDetails(Guid id)
+        {
+            var cycle = await _mediator.Send(new AjoCoreBackend.Application.Queries.GetMyCycleDetails.GetMyCycleDetailsQuery { SavingCycleId = id, ExpectedCycleType = "Personal" });
+            return Ok(cycle);
+        }
+
+        [HttpGet("rosca/{id}")]
+        public async Task<IActionResult> GetRoscaCycleDetails(Guid id)
+        {
+            var cycle = await _mediator.Send(new AjoCoreBackend.Application.Queries.GetMyCycleDetails.GetMyCycleDetailsQuery { SavingCycleId = id, ExpectedCycleType = "Rosca" });
+            return Ok(cycle);
+        }
+
+        [HttpGet("asca/{id}")]
+        public async Task<IActionResult> GetAscaCycleDetails(Guid id)
+        {
+            var cycle = await _mediator.Send(new AjoCoreBackend.Application.Queries.GetMyCycleDetails.GetMyCycleDetailsQuery { SavingCycleId = id, ExpectedCycleType = "Asca" });
+            return Ok(cycle);
+        }
+
+        [Authorize(Roles = "CooperativeAdmin")]
+        [HttpGet("{id}/members")]
+        public async Task<IActionResult> GetCycleMembers(Guid id)
+        {
+            var members = await _mediator.Send(new AjoCoreBackend.Application.Queries.GetSavingCycleMembers.GetSavingCycleMembersQuery { SavingCycleId = id });
+            return Ok(members);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {

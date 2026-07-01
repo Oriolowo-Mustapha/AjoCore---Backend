@@ -8,8 +8,11 @@ using AjoCoreBackend.Application.Commands.Auth.VerifyEmail;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using AjoCoreBackend.Application.Commands.Auth.UpdateBvn;
 using AjoCoreBackend.Application.Commands.Auth.UpdatePayoutAccount;
+using AjoCoreBackend.Application.DTOs.Auth;
+using AjoCoreBackend.Application.Commands.Auth.AdminLogin;
 
 namespace AjoCoreBackend.API.Controllers
 {
@@ -38,13 +41,33 @@ namespace AjoCoreBackend.API.Controllers
             return Ok(new { Success = result });
         }
 
+        /// <summary>
+        /// Login a user and return a JWT token.
+        /// </summary>
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginCommand command)
+        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Login(LoginCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(result);
         }
 
+        /// <summary>
+        /// Login a System Admin and return a JWT token.
+        /// </summary>
+        [HttpPost("admin-login")]
+        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> AdminLogin(AdminLoginCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Refresh an expired JWT token using a valid refresh token.
+        /// </summary>
         [HttpPost("refresh")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
         {

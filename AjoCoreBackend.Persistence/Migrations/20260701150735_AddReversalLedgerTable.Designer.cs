@@ -3,6 +3,7 @@ using System;
 using AjoCoreBackend.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AjoCoreBackend.Persistence.Migrations
 {
     [DbContext(typeof(AjoCoreDbContext))]
-    partial class AjoCoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260701150735_AddReversalLedgerTable")]
+    partial class AddReversalLedgerTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -470,88 +473,6 @@ namespace AjoCoreBackend.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("SavingCycleMembers");
-                });
-
-            modelBuilder.Entity("AjoCoreBackend.Domain.Entities.SystemAdmin", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("RefreshTokenExpiryTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
-                    b.ToTable("SystemAdmins");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("d8a8b132-23cf-4235-866c-333e213320c4"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "baseapha@gmail.com",
-                            FirstName = "Oriolowo",
-                            LastName = "Mustapha",
-                            PasswordHash = "$2a$12$smqy6Q9xGlXerUxW.AV1YuKeNBCsTwVfap/uqw9EvmnsGsWRq4oTi",
-                            Role = 2,
-                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Username = "apha"
-                        },
-                        new
-                        {
-                            Id = new Guid("f827e8d6-444f-4a0b-8d14-b5ebc5344d57"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "adeyemiadigun12@gmail.com",
-                            FirstName = "Adeyemi",
-                            LastName = "Mubarak",
-                            PasswordHash = "$2a$12$5TN4fUTIeV2KyeUdA0geAeqaQkuhbB2M9q.plC3n48PBLm3fx/ECS",
-                            Role = 2,
-                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Username = "ghost"
-                        });
                 });
 
             modelBuilder.Entity("AjoCoreBackend.Domain.Entities.Trader", b =>

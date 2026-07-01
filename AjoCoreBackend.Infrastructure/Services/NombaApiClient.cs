@@ -68,8 +68,8 @@ namespace AjoCoreBackend.Infrastructure.Services
 
             var response = await _httpClient.PostAsJsonAsync("/v1/transfers/bank", payload);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<BankTransferResponse>()
-                   ?? new BankTransferResponse();
+            var wrapper = await response.Content.ReadFromJsonAsync<NombaApiResponse<BankTransferResponse>>();
+            return wrapper?.Data ?? new BankTransferResponse();
         }
 
         public async Task<FetchBanksResponse> FetchBanksAsync()

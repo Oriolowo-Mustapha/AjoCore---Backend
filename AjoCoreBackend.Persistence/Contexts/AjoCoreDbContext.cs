@@ -20,6 +20,8 @@ namespace AjoCoreBackend.Persistence.Contexts
         public DbSet<CooperativeGroupMember> CooperativeGroupMembers { get; set; } = null!;
         public DbSet<InboundTransaction> InboundTransactions { get; set; } = null!;
         public DbSet<RotationalSlot> RotationalSlots { get; set; } = null!;
+        public DbSet<ReversalLedger> ReversalLedgers { get; set; } = null!;
+        public DbSet<SystemAdmin> SystemAdmins { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

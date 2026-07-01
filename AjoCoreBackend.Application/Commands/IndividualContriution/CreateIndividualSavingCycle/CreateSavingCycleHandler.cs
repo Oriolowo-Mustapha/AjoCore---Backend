@@ -58,33 +58,28 @@ namespace AjoCoreBackend.Application.Commands.IndividualContriution.CreateIndivi
             {
                 UserId = (Guid)_currentUser.UserGuid!,
                 SavingCycleId = newSavingCycle.Id,
-                NombaVirtualAccountId = virtualAccount.Id
+                VirtualAccount = virtualAccount
             };
 
             newSavingCycle.Members.Add( savingCycleMember );
 
             await _unitOfWork.SavingCycles.AddAsync(newSavingCycle);
 
-            await _unitOfWork.Repository<NombaVirtualAccount>().AddAsync(virtualAccount);
-
-            await _unitOfWork.Repository<SavingCycleMember>().AddAsync(savingCycleMember);
-
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            _hangfireBackgroundService.ScheduleTask<CreateIndividualSavingCycleHandler>(x => x.UpdateCycleStatusSendNotification(newSavingCycle.Id), newSavingCycle.StartDate.AddSeconds(5));
+            _hangfireBackgroundService.ScheduleTask<CreateIndividualSavingCycleHandler>(x => x.UpdateCycleStatusSendNotification(newSavingCycle.Id, userId), newSavingCycle.StartDate.AddSeconds(5));
 
             return newSavingCycle.Id;
         }
 
-        private async Task UpdateCycleStatusSendNotification(Guid SavingCycleId)
+        public async Task UpdateCycleStatusSendNotification(Guid SavingCycleId, Guid userId)
         {
             var now = DateTime.UtcNow;
-            var userId = _currentUser.UserGuid ?? throw new KeyNotFoundException($"Current user with ID {_currentUser.UserId} not found");
 
             var cycles = await _unitOfWork.Repository<SavingCycle>()
                 .FindAsync(x =>
                     x.Status == CycleStatus.Pending &&
-                    x.Id == SavingCycleId, c => c.Members.First(s => s.UserId == userId));
+                    x.Id == SavingCycleId, c => c.Members);
             var cycle = cycles.FirstOrDefault();
 
             if (cycle == null) return;

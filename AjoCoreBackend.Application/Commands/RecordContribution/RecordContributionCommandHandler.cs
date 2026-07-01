@@ -71,6 +71,8 @@ namespace AjoCoreBackend.Application.Commands.RecordContribution
                 await _unitOfWork.Repository<ReversalLedger>().AddAsync(reversal);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 _hangfireService.EnqueTask<IReversalProcessingService>(x => x.ProcessPendingReversalsAsync(reversal.Id));
+                
+                return Guid.Empty; // Halt execution so we don't record the invalid contribution
             }
 
             // 5. Record Ledger Entry

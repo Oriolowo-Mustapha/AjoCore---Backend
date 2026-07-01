@@ -39,6 +39,13 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.RequestJoinGroup
                 throw new DomainException("Admin cannot request to join their own group.");
             }
 
+            // Ensure the user is actually a Trader
+            var trader = await _unitOfWork.Repository<Trader>().GetByIdAsync(userId);
+            if (trader == null)
+            {
+                throw new DomainException("Only registered Traders can join a Cooperative Group. Cooperative Admins cannot join groups as members.");
+            }
+
             // Check if already a member or has a pending request
             var existing = await _unitOfWork.Repository<CooperativeGroupMember>()
                 .FindAsync(m => m.CooperativeGroupId == request.GroupId && m.TraderId == userId);

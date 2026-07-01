@@ -54,9 +54,8 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.AddMembers
 
             foreach (var memberDto in request.Members)
             {
-                // Try find by phone number or email
+                // Try find by email only
                 var existingTraders = await _unitOfWork.Repository<Trader>().FindAsync(t => 
-                    t.PhoneNumber == memberDto.PhoneNumber || 
                     t.Email.ToLower() == memberDto.Email.ToLower());
                 
                 var trader = existingTraders.FirstOrDefault();

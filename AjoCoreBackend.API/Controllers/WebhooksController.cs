@@ -33,7 +33,7 @@ namespace AjoCoreBackend.API.Controllers
             using var reader = new StreamReader(Request.Body);
             var payload = await reader.ReadToEndAsync();
 
-            // Temporarily bypass signature validation for Postman testing
+            // TEMPORARILY DISABLED FOR OUTRAY TESTING
             // if (!_signatureValidator.ValidateSignature(payload, signatureHeader))
             // {
             //     return Unauthorized("Invalid webhook signature.");

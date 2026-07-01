@@ -6,16 +6,19 @@ using System.Threading.Tasks;
 using AjoCoreBackend.Domain.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace AjoCoreBackend.API.Middlewares
 {
     public class ExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
-        public ExceptionHandlingMiddleware(RequestDelegate next)
+        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -26,66 +29,94 @@ namespace AjoCoreBackend.API.Middlewares
             }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(context, ex);
+                await HandleExceptionAsync(context, ex, _logger);
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private static Task HandleExceptionAsync(HttpContext context, Exception exception, ILogger logger)
         {
-            Console.WriteLine($"[Exception Middleware] {exception}");
+            var requestId = context.TraceIdentifier;
+            logger.LogError(exception, "An unhandled exception occurred during request {RequestId}. Path: {Path}", requestId, context.Request.Path);
+            
             context.Response.ContentType = "application/json";
             
             int statusCode;
-            object response;
+            string code;
+            string message;
+            object details = null;
 
             switch (exception)
             {
                 case ValidationException validationException:
-                    statusCode = (int)HttpStatusCode.BadRequest;
-                    var errors = validationException.Errors
+                    statusCode = (int)HttpStatusCode.UnprocessableEntity; // 422 for validation
+                    code = "VALIDATION_ERROR";
+                    message = "One or more validation errors occurred.";
+                    details = validationException.Errors
                         .GroupBy(e => e.PropertyName)
                         .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
-                    response = new { errors };
                     break;
 
                 case NotFoundException notFoundException:
                     statusCode = (int)HttpStatusCode.NotFound;
-                    response = new { error = notFoundException.Message };
+                    code = "NOT_FOUND";
+                    message = notFoundException.Message;
                     break;
 
                 case ForbiddenAccessException forbiddenException:
                     statusCode = (int)HttpStatusCode.Forbidden;
-                    response = new { error = forbiddenException.Message };
+                    code = "FORBIDDEN";
+                    message = forbiddenException.Message;
                     break;
 
                 case InvalidCredentialsException credentialsException:
                     statusCode = (int)HttpStatusCode.Unauthorized;
-                    response = new { error = credentialsException.Message };
+                    code = "UNAUTHORIZED";
+                    message = credentialsException.Message;
                     break;
 
                 case DuplicateEmailException duplicateEmailException:
                     statusCode = (int)HttpStatusCode.Conflict;
-                    response = new { error = duplicateEmailException.Message };
+                    code = "CONFLICT";
+                    message = duplicateEmailException.Message;
                     break;
 
                 case DuplicateWebhookException duplicateException:
                     statusCode = (int)HttpStatusCode.Conflict;
-                    response = new { error = duplicateException.Message };
+                    code = "CONFLICT";
+                    message = duplicateException.Message;
                     break;
 
                 case DomainException domainException:
                     statusCode = (int)HttpStatusCode.BadRequest;
-                    response = new { error = domainException.Message };
+                    code = "BAD_REQUEST";
+                    message = domainException.Message;
                     break;
 
                 default:
                     statusCode = (int)HttpStatusCode.InternalServerError;
-                    response = new { error = "An unexpected error occurred." };
+                    code = "INTERNAL_SERVER_ERROR";
+                    message = "An unexpected error occurred.";
                     break;
             }
 
             context.Response.StatusCode = statusCode;
-            var result = JsonSerializer.Serialize(response, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+            var response = new 
+            {
+                error = new 
+                {
+                    code,
+                    message,
+                    details,
+                    requestId
+                }
+            };
+
+            var result = JsonSerializer.Serialize(response, new JsonSerializerOptions 
+            { 
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
             
             return context.Response.WriteAsync(result);
         }

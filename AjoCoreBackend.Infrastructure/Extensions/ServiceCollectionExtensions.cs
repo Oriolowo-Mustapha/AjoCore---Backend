@@ -49,6 +49,7 @@ namespace AjoCoreBackend.Infrastructure.Extensions
             // Register Background Jobs as Transient for Hangfire
             services.AddTransient<BackgroundJobs.LiquidationSweepService>();
             services.AddTransient<BackgroundJobs.SavingReminderService>();
+            services.AddTransient<IReversalProcessingService, ReversalProcessingService>();
 
             services.AddHangfire(config =>
             {

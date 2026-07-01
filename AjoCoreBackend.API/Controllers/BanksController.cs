@@ -5,6 +5,7 @@ using AjoCoreBackend.Application.DTOs.Nomba;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using System;
+using AjoCoreBackend.Domain.Exceptions;
 
 namespace AjoCoreBackend.API.Controllers
 {
@@ -42,25 +43,18 @@ namespace AjoCoreBackend.API.Controllers
                 return BadRequest(new { success = false, message = "Invalid bank name provided." });
             }
 
-            try
-            {
                 var response = await _nombaApiClient.LookupBankAccountAsync(new BankLookupRequest
                 {
                     AccountNumber = accountNumber,
                     BankCode = bankCode
                 });
 
-                if (string.IsNullOrWhiteSpace(response.AccountName))
+                if (response == null || string.IsNullOrWhiteSpace(response.AccountName))
                 {
-                    return NotFound(new { success = false, message = "Account details not found." });
+                    throw new NotFoundException("Account details not found with the provider.");
                 }
 
                 return Ok(new { success = true, data = response });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { success = false, message = "Failed to verify account details with the provider." });
-            }
         }
     }
 }

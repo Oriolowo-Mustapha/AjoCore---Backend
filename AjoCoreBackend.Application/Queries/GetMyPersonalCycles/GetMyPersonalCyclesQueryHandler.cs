@@ -37,8 +37,11 @@ namespace AjoCoreBackend.Application.Queries.GetMyPersonalCycles
             foreach (var c in allCycles)
             {
                 var cycleMembers = await _unitOfWork.Repository<SavingCycleMember>().FindAsync(m => m.SavingCycleId == c.Id && m.UserId == userId);
-                if (cycleMembers.Any())
+                var member = cycleMembers.FirstOrDefault();
+                if (member != null)
                 {
+                    var vAccount = await _unitOfWork.Repository<NombaVirtualAccount>().GetByIdAsync(member.NombaVirtualAccountId);
+
                     personalCycles.Add(new SavingCycleDto
                     {
                         Id = c.Id,
@@ -49,7 +52,18 @@ namespace AjoCoreBackend.Application.Queries.GetMyPersonalCycles
                         TargetAmount = c.IndividualTargetAmount,
                         StartDate = c.StartDate,
                         EndDate = c.EndDate,
-                        Status = c.Status.ToString()
+                        Status = c.Status.ToString(),
+                        Members = new List<SavingCycleMemberDto>
+                        {
+                            new SavingCycleMemberDto
+                            {
+                                Id = member.Id,
+                                SavingCycleId = c.Id,
+                                VirtualAccountNumber = vAccount?.AccountNumber,
+                                VirtualAccountBank = vAccount?.BankName,
+                                Status = member.Status.ToString()
+                            }
+                        }
                     });
                 }
             }

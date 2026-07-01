@@ -23,6 +23,20 @@ public class ReversalProcessingService : IReversalProcessingService
     private readonly ILogger<ReversalProcessingService> _logger;
     private readonly IEmailService _emailService;
 
+    public ReversalProcessingService(
+        IUnitOfWork unitOfWork,
+        INombaApiClient nombaApiClient,
+        IBankCodeService bankCodeService,
+        ILogger<ReversalProcessingService> logger,
+        IEmailService emailService)
+    {
+        _unitOfWork = unitOfWork;
+        _nombaApiClient = nombaApiClient;
+        _bankCodeService = bankCodeService;
+        _logger = logger;
+        _emailService = emailService;
+    }
+
     public async Task ProcessPendingReversalsAsync(Guid reversalLedgerId)
     {
         // 1. Get all pending reversals

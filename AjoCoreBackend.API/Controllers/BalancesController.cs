@@ -29,7 +29,7 @@ namespace AjoCoreBackend.API.Controllers
         public async Task<IActionResult> GetSystemBalance()
         {
             var result = await _mediator.Send(new GetSystemAdminBalanceQuery());
-            return Ok(result);
+            return Ok(new { systemStats = result });
         }
 
         /// <summary>

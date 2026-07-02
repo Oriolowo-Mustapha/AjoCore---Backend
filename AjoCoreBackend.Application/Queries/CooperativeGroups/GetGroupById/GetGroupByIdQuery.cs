@@ -4,7 +4,7 @@ using MediatR;
 
 namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetGroupById
 {
-    public record GetGroupByIdQuery : IRequest<CooperativeGroupDto>
+    public record GetGroupByIdQuery : IRequest<CooperativeGroupDetailDto>
     {
         public Guid GroupId { get; init; }
     }

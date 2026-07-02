@@ -29,7 +29,8 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetTraderBalance
 
             var traderBalanceDto = new TraderBalanceDto
             {
-                OverallTotalPaid = 0
+                OverallTotalPaid = 0,
+                PendingContributions = 0
             };
 
             foreach (var member in members)
@@ -50,6 +51,11 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetTraderBalance
                 }
 
                 traderBalanceDto.OverallTotalPaid += totalPaid;
+
+                if (cycle.Status == Domain.Enum.CycleStatus.Active)
+                {
+                    traderBalanceDto.PendingContributions += Math.Max(0, targetAmount - totalPaid);
+                }
 
                 traderBalanceDto.CycleBalances.Add(new TraderCycleBalanceDto
                 {

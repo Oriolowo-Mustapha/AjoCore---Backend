@@ -5,18 +5,26 @@ namespace AjoCoreBackend.Application.DTOs.Balances
 {
     public record SystemAdminBalanceDto
     {
+        public int ActiveCycles { get; init; }
+        public int TotalGroups { get; init; }
+        public int TotalMembers { get; init; }
         public decimal TotalContributions { get; init; }
         public decimal TotalPayouts { get; init; }
         public decimal TotalReversals { get; init; }
+        public decimal PendingContributions { get; init; }
         public decimal SystemWalletBalance => TotalContributions - TotalPayouts - TotalReversals;
     }
 
     public record CooperativeAdminBalanceDto
     {
         public Guid CooperativeGroupId { get; init; }
+        public int ActiveCycles { get; init; }
+        public int TotalMembers { get; init; }
+        public int TotalGroups { get; init; }
         public decimal TotalContributions { get; init; }
         public decimal TotalPayouts { get; init; }
         public decimal TotalReversals { get; init; }
+        public decimal PendingContributions { get; init; }
         public decimal GroupWalletBalance => TotalContributions - TotalPayouts - TotalReversals;
     }
 
@@ -32,6 +40,7 @@ namespace AjoCoreBackend.Application.DTOs.Balances
     public record TraderBalanceDto
     {
         public decimal OverallTotalPaid { get; set; }
+        public decimal PendingContributions { get; set; }
         public List<TraderCycleBalanceDto> CycleBalances { get; init; } = new();
     }
 

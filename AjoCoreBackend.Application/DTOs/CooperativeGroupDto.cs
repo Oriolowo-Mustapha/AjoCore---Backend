@@ -11,6 +11,9 @@ namespace AjoCoreBackend.Application.DTOs
         public string AdminName { get; init; } = string.Empty;
         public int MemberCount { get; init; }
         public int CycleCount { get; init; }
+        public decimal SavingsGoal { get; init; }
+        public decimal TotalSaved { get; init; }
+        public bool IsActive { get; init; }
         public DateTime CreatedAt { get; init; }
     }
 }

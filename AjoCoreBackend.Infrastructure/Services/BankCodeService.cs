@@ -85,13 +85,13 @@ namespace AjoCoreBackend.Infrastructure.Services
                 
                 foreach (var bank in _rawBanksCache)
                 {
-                    if (!string.IsNullOrWhiteSpace(bank.Name) && !string.IsNullOrWhiteSpace(bank.Code))
+                    if (!string.IsNullOrWhiteSpace(bank.BankName) && !string.IsNullOrWhiteSpace(bank.BankCode))
                     {
-                        var normalizedName = NormalizeBankName(bank.Name);
+                        var normalizedName = NormalizeBankName(bank.BankName);
                         // Prevent duplicates if API returns any
                         if (!_bankCodesCache.ContainsKey(normalizedName))
                         {
-                            _bankCodesCache.Add(normalizedName, bank.Code);
+                            _bankCodesCache.Add(normalizedName, bank.BankCode);
                         }
                     }
                 }

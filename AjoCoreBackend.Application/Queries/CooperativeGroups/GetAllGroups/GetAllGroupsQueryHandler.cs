@@ -19,7 +19,7 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetAllGroups
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<CooperativeGroupDto>> Handle(GetAllGroupsQuery request, CancellationToken cancellationToken)
+        public async Task<List<AjoCoreBackend.Application.DTOs.CooperativeGroupDto>> Handle(GetAllGroupsQuery request, CancellationToken cancellationToken)
         {
             IEnumerable<CooperativeGroup> groups;
 
@@ -34,7 +34,7 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetAllGroups
                 groups = await _unitOfWork.Repository<CooperativeGroup>().GetAllAsync();
             }
 
-            var result = new List<CooperativeGroupDto>();
+            var result = new List<AjoCoreBackend.Application.DTOs.CooperativeGroupDto>();
 
             foreach (var group in groups)
             {
@@ -44,32 +44,36 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetAllGroups
                 var cycles = await _unitOfWork.Repository<SavingCycle>()
                     .FindAsync(c => c.CooperativeGroupId == group.Id);
 
-                result.Add(new CooperativeGroupDto
+                // Fetch cycle members and their contributions for the TotalSaved calculation
+                decimal totalSaved = 0;
+                bool isActive = false;
+                foreach (var cycle in cycles)
+                {
+                    if (cycle.Status == CycleStatus.Active) isActive = true;
+                    var cycleMembers = await _unitOfWork.Repository<SavingCycleMember>().FindAsync(m => m.SavingCycleId == cycle.Id);
+                    foreach(var cm in cycleMembers) {
+                        var contributions = await _unitOfWork.Repository<ContributionLedger>().FindAsync(c => c.SavingCycleMemberId == cm.Id);
+                        totalSaved += contributions.Sum(c => c.Amount);
+                    }
+                }
+
+                result.Add(new AjoCoreBackend.Application.DTOs.CooperativeGroupDto
                 {
                     Id = group.Id,
                     Name = group.Name,
                     Description = group.Description,
-                    CooperativeAdminId = group.CooperativeAdminId,
+                    AdminTraderId = group.CooperativeAdminId,
                     AdminName = admin != null ? $"{admin.FirstName} {admin.LastName}" : "Unknown",
                     MemberCount = members.Count(),
                     CycleCount = cycles.Count(),
+                    SavingsGoal = cycles.Sum(c => c.ContributionAmount), // Wait, is SavingsGoal ContributionAmount * members? The prompt says "sum of all ContributionAmount values across all cycles"
+                    TotalSaved = totalSaved,
+                    IsActive = isActive,
                     CreatedAt = group.CreatedAt
                 });
             }
 
             return result;
         }
-    }
-
-    public class CooperativeGroupDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public Guid CooperativeAdminId { get; set; }
-        public string AdminName { get; set; } = string.Empty;
-        public int MemberCount { get; set; }
-        public int CycleCount { get; set; }
-        public DateTime CreatedAt { get; set; }
     }
 }

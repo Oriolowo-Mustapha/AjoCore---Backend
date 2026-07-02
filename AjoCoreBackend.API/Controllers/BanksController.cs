@@ -26,7 +26,7 @@ namespace AjoCoreBackend.API.Controllers
         public async Task<IActionResult> GetBanks()
         {
             var banks = await _bankCodeService.GetAllBanksAsync();
-            return Ok(new { success = true, data = banks.OrderBy(b => b.Name) });
+            return Ok(new { success = true, data = banks.OrderBy(b => b.BankName) });
         }
 
         [HttpGet("lookup")]

@@ -12,11 +12,13 @@ namespace AjoCoreBackend.Infrastructure.Services
     {
         private readonly HttpClient _httpClient;
         private readonly INombaTokenService _tokenService;
+        private readonly string _accountId;
 
-        public NombaApiClient(HttpClient httpClient, INombaTokenService tokenService)
+        public NombaApiClient(HttpClient httpClient, INombaTokenService tokenService, Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+            _accountId = configuration["Nomba:AccountId"] ?? throw new ArgumentNullException("Nomba AccountId is missing in configuration.");
         }
 
         private async Task SetAuthorizationHeaderAsync()
@@ -79,6 +81,20 @@ namespace AjoCoreBackend.Infrastructure.Services
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<FetchBanksResponse>()
                    ?? new FetchBanksResponse();
+        }
+
+        public async Task<VerifyTransactionResponse> VerifyTransactionAsync(string transactionReference)
+        {
+            await SetAuthorizationHeaderAsync();
+            
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/v1/transactions/accounts/single?transactionRef={transactionReference}");
+            request.Headers.Add("accountId", _accountId);
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            
+            var wrapper = await response.Content.ReadFromJsonAsync<NombaApiResponse<VerifyTransactionResponse>>();
+            return wrapper?.Data ?? new VerifyTransactionResponse();
         }
     }
 }

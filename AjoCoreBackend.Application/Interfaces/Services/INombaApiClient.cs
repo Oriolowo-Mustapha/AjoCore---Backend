@@ -10,5 +10,6 @@ namespace AjoCoreBackend.Application.Interfaces.Services
         Task<BankLookupResponse> LookupBankAccountAsync(BankLookupRequest request);
         Task<BankTransferResponse> ExecuteBankTransferAsync(BankTransferRequest request);
         Task<FetchBanksResponse> FetchBanksAsync();
+        Task<VerifyTransactionResponse> VerifyTransactionAsync(string transactionReference);
     }
 }

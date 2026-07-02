@@ -1,11 +1,15 @@
+using AjoCoreBackend.API.Middlewares;
 using AjoCoreBackend.API.Services;
 using AjoCoreBackend.Application.Extensions;
 using AjoCoreBackend.Application.Interfaces.Services;
+using AjoCoreBackend.Infrastructure.BackgroundJobs;
 using AjoCoreBackend.Infrastructure.Extensions;
 using AjoCoreBackend.Persistence.Extensions;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using NSwag;
+using NSwag.Generation.Processors.Security;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +23,7 @@ builder.Services.AddOpenApiDocument(document =>
 {
     document.Title = "AjoCore API";
     document.Version = "v1";
-    document.AddSecurity("Bearer", Enumerable.Empty<string>(), new NSwag.OpenApiSecurityScheme
+    document.AddSecurity("Bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme
     {
         Type = NSwag.OpenApiSecuritySchemeType.ApiKey,
         Name = "Authorization",
@@ -28,7 +32,7 @@ builder.Services.AddOpenApiDocument(document =>
     });
 
     document.OperationProcessors.Add(
-        new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("Bearer"));
+        new AspNetCoreOperationSecurityScopeProcessor("Bearer"));
 });
 
 // Register Clean Architecture Layers
@@ -81,18 +85,18 @@ var app = builder.Build();
 
 app.UseHangfireDashboard("/hangfire");
 
-RecurringJob.AddOrUpdate<AjoCoreBackend.Infrastructure.BackgroundJobs.LiquidationSweepService>(
+RecurringJob.AddOrUpdate<LiquidationSweepService>(
     "liquidation-sweep",
     service => service.ProcessLiquidationsAsync(),
     Cron.Daily); // Or Cron.Minutely for testing
 
-RecurringJob.AddOrUpdate<AjoCoreBackend.Infrastructure.BackgroundJobs.SavingReminderService>(
+RecurringJob.AddOrUpdate<SavingReminderService>(
     "saving-reminders",
     service => service.ProcessRemindersAsync(),
     Cron.Daily);
 
 // Configure the HTTP request pipeline.
-app.UseMiddleware<AjoCoreBackend.API.Middlewares.ExceptionHandlingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

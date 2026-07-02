@@ -79,8 +79,6 @@ namespace AjoCoreBackend.API.Controllers
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
         {
             var result = await _mediator.Send(command);
-            // In a real app you might just return Ok("Reset email sent"), 
-            // but for hackathon testing we return the code.
             return Ok(new { ResetToken = result });
         }
 

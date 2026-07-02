@@ -10,7 +10,7 @@ using MediatR;
 
 namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetGroupById
 {
-    public class GetGroupByIdQueryHandler : IRequestHandler<GetGroupByIdQuery, CooperativeGroupDto>
+    public class GetGroupByIdQueryHandler : IRequestHandler<GetGroupByIdQuery, CooperativeGroupDetailDto>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -19,7 +19,7 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetGroupById
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<CooperativeGroupDto> Handle(GetGroupByIdQuery request, CancellationToken cancellationToken)
+        public async Task<CooperativeGroupDetailDto> Handle(GetGroupByIdQuery request, CancellationToken cancellationToken)
         {
             var group = await _unitOfWork.Repository<CooperativeGroup>().GetByIdAsync(request.GroupId);
             
@@ -29,8 +29,16 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetGroupById
             }
 
             var admin = await _unitOfWork.Repository<CooperativeAdmin>().GetByIdAsync(group.CooperativeAdminId);
-            var members = await _unitOfWork.Repository<CooperativeGroupMember>()
-                .FindAsync(m => m.CooperativeGroupId == group.Id && m.Status == ApprovalStatus.Approved);
+            
+            var allMembers = await _unitOfWork.Repository<CooperativeGroupMember>()
+                .FindAsync(m => m.CooperativeGroupId == group.Id);
+            
+            var approvedMembers = allMembers.Where(m => m.Status == ApprovalStatus.Approved).ToList();
+            var pendingMembers = allMembers.Where(m => m.Status == ApprovalStatus.Pending).ToList();
+            
+            var traderIds = allMembers.Select(m => m.TraderId).Distinct().ToList();
+            var traders = await _unitOfWork.Repository<Trader>().FindAsync(t => traderIds.Contains(t.Id));
+
             var cycles = await _unitOfWork.Repository<SavingCycle>()
                 .FindAsync(c => c.CooperativeGroupId == group.Id);
 
@@ -46,19 +54,47 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetGroupById
                 }
             }
 
-            return new CooperativeGroupDto
+            return new CooperativeGroupDetailDto
             {
                 Id = group.Id,
                 Name = group.Name,
                 Description = group.Description,
                 AdminTraderId = group.CooperativeAdminId,
                 AdminName = admin != null ? $"{admin.FirstName} {admin.LastName}" : "Unknown",
-                MemberCount = members.Count(),
+                MemberCount = approvedMembers.Count,
                 CycleCount = cycles.Count(),
                 SavingsGoal = cycles.Sum(c => c.ContributionAmount),
                 TotalSaved = totalSaved,
                 IsActive = isActive,
-                CreatedAt = group.CreatedAt
+                CreatedAt = group.CreatedAt,
+                Members = approvedMembers.Select(m => {
+                    var trader = traders.FirstOrDefault(t => t.Id == m.TraderId);
+                    return new GroupMemberSummaryDto {
+                        TraderId = m.TraderId,
+                        TraderName = trader != null ? $"{trader.FirstName} {trader.LastName}" : "Unknown",
+                        JoinedAt = m.CreatedAt
+                    };
+                }).ToList(),
+                PendingRequests = pendingMembers.Select(m => {
+                    var trader = traders.FirstOrDefault(t => t.Id == m.TraderId);
+                    return new PendingRequestDto {
+                        TraderId = m.TraderId,
+                        TraderName = trader != null ? $"{trader.FirstName} {trader.LastName}" : "Unknown",
+                        RequestedAt = m.CreatedAt
+                    };
+                }).ToList(),
+                ActiveCycles = cycles.Where(c => c.Status == CycleStatus.Active).Select(c => new SavingCycleSummaryDto {
+                    Id = c.Id,
+                    Name = c.Name,
+                    ContributionAmount = c.ContributionAmount,
+                    Status = c.Status.ToString()
+                }).ToList(),
+                CompletedCycles = cycles.Where(c => c.Status == CycleStatus.Completed).Select(c => new SavingCycleSummaryDto {
+                    Id = c.Id,
+                    Name = c.Name,
+                    ContributionAmount = c.ContributionAmount,
+                    Status = c.Status.ToString()
+                }).ToList()
             };
         }
     }

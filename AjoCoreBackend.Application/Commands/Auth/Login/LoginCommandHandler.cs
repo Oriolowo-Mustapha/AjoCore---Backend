@@ -5,6 +5,7 @@ using AjoCoreBackend.Application.DTOs.Auth;
 using AjoCoreBackend.Application.Interfaces.Repositories;
 using AjoCoreBackend.Application.Interfaces.Services;
 using AjoCoreBackend.Domain.Entities;
+using AjoCoreBackend.Domain.Enum;
 using AjoCoreBackend.Domain.Exceptions;
 using MediatR;
 
@@ -32,8 +33,8 @@ namespace AjoCoreBackend.Application.Commands.Auth.Login
             string userEmail = "";
             string userFullName = "";
             string userPasswordHash = "";
-            System.Guid userId = System.Guid.Empty;
-            Domain.Enum.UserRole userRole = Domain.Enum.UserRole.Trader;
+            Guid userId = Guid.Empty;
+            UserRole userRole = UserRole.Trader;
 
             var traders = await _unitOfWork.Repository<Trader>()
                 .FindAsync(t => t.Email.ToLower() == request.Email.ToLower());

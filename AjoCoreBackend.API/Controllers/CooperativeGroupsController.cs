@@ -35,6 +35,17 @@ namespace AjoCoreBackend.API.Controllers
         }
 
         /// <summary>
+        /// Get a single cooperative group by ID.
+        /// </summary>
+        [HttpGet("{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var result = await _mediator.Send(new AjoCoreBackend.Application.Queries.CooperativeGroups.GetGroupById.GetGroupByIdQuery { GroupId = id });
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Create a cooperative group. Only CooperativeAdmin role.
         /// </summary>
         [Authorize(Roles = "CooperativeAdmin")]

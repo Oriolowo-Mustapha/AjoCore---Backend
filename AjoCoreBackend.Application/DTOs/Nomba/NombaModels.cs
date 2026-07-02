@@ -93,7 +93,10 @@ namespace AjoCoreBackend.Application.DTOs.Nomba
 
     public record BankDto
     {
-        public string Code { get; init; } = string.Empty;
-        public string Name { get; init; } = string.Empty;
+        [System.Text.Json.Serialization.JsonPropertyName("code")]
+        public string BankCode { get; init; } = string.Empty;
+
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        public string BankName { get; init; } = string.Empty;
     }
 }

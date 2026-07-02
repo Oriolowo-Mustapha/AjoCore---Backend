@@ -16,6 +16,7 @@ namespace AjoCoreBackend.Application.DTOs
         public DateTime StartDate { get; init; }
         public DateTime? EndDate { get; init; }
         public DateTime CreatedAt { get; init; }
+        public decimal TotalSaved { get; init; }
         public List<SavingCycleMemberDto>? Members { get; init; } = new List<SavingCycleMemberDto>();
         public IndividualSavingCycleDto? IndividualSavingCycle { get; init; }
     }

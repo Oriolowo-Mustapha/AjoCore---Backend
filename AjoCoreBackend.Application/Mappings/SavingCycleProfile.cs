@@ -2,6 +2,7 @@ using AjoCoreBackend.Application.DTOs;
 using AjoCoreBackend.Application.DTOs.IndividualSavingCycle;
 using AjoCoreBackend.Domain.Entities;
 using AutoMapper;
+using System.Linq;
 
 namespace AjoCoreBackend.Application.Mappings
 {
@@ -12,7 +13,9 @@ namespace AjoCoreBackend.Application.Mappings
             // SavingCycle → SavingCycleDto
             CreateMap<SavingCycle, SavingCycleDto>()
                 .ForMember(dest => dest.CycleType, opt => opt.MapFrom(src => src.CycleType.ToString()))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.TotalSaved, opt => opt.MapFrom(src => 
+                    src.Members != null ? src.Members.SelectMany(m => m.Contributions ?? new System.Collections.Generic.List<ContributionLedger>()).Sum(c => c.Amount) : 0));
 
             // SavingCycleMember → SavingCycleMemberDto
             // Flatten the nested VirtualAccount properties directly onto the DTO

@@ -24,7 +24,10 @@ namespace AjoCoreBackend.Infrastructure.Services
             var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
             var hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
 
-            return hashString.Equals(signatureHeader, StringComparison.OrdinalIgnoreCase);
+            return CryptographicOperations.FixedTimeEquals(
+                Encoding.UTF8.GetBytes(hashString),
+                Encoding.UTF8.GetBytes(signatureHeader.ToLowerInvariant())
+            );
         }
     }
 }

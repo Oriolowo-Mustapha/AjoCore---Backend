@@ -9,6 +9,7 @@ using AjoCoreBackend.Domain.Entities;
 using AjoCoreBackend.Domain.Enum;
 using AjoCoreBackend.Domain.Exceptions;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace AjoCoreBackend.Application.Commands.Auth.Register
 {
@@ -18,17 +19,20 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IEmailService _emailService;
+        private readonly Microsoft.Extensions.Logging.ILogger<RegisterCommandHandler> _logger;
 
         public RegisterCommandHandler(
             IUnitOfWork unitOfWork,
             IPasswordHasher passwordHasher,
             IJwtTokenService jwtTokenService,
-            IEmailService emailService)
+            IEmailService emailService,
+            Microsoft.Extensions.Logging.ILogger<RegisterCommandHandler> logger)
         {
             _unitOfWork = unitOfWork;
             _passwordHasher = passwordHasher;
             _jwtTokenService = jwtTokenService;
             _emailService = emailService;
+            _logger = logger;
         }
 
         public async Task<string> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -42,6 +46,18 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
             if (existingTraders.Any() || existingAdmins.Any())
             {
                 throw new DuplicateEmailException(request.Email);
+            }
+
+            // Check for duplicate phone number in BOTH tables
+            var tradersWithPhone = await _unitOfWork.Repository<Trader>()
+                .FindAsync(t => t.PhoneNumber == request.PhoneNumber);
+            var adminsWithPhone = await _unitOfWork.Repository<CooperativeAdmin>()
+                .FindAsync(a => a.PhoneNumber == request.PhoneNumber);
+
+            if (tradersWithPhone.Any() || adminsWithPhone.Any())
+            {
+                _logger.LogWarning("Registration failed: Phone number {PhoneNumber} is already in use by another user.", request.PhoneNumber);
+                throw new DuplicatePhoneNumberException(request.PhoneNumber);
             }
 
             var role = Enum.Parse<UserRole>(request.Role);

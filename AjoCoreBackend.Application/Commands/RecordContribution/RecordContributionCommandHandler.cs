@@ -13,20 +13,32 @@ namespace AjoCoreBackend.Application.Commands.RecordContribution
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTimeProvider;
         private readonly IHangfireBackGroundService _hangfireService;
-        private readonly IReversalProcessingService _reversalProcessingService;
+        private readonly INombaApiClient _nombaApiClient;
 
         public RecordContributionCommandHandler(
             IUnitOfWork unitOfWork,
             IDateTimeProvider dateTimeProvider,
-            IHangfireBackGroundService hangfireService)
+            IHangfireBackGroundService hangfireService,
+            INombaApiClient nombaApiClient)
         {
             _unitOfWork = unitOfWork;
             _dateTimeProvider = dateTimeProvider;
             _hangfireService = hangfireService;
+            _nombaApiClient = nombaApiClient;
         }
 
         public async Task<Guid> Handle(RecordContributionCommand request, CancellationToken cancellationToken)
         {
+            // 0. Verify Transaction with Nomba (Security best practice)
+            if (!string.IsNullOrEmpty(request.TransactionReference))
+            {
+                var verifyResponse = await _nombaApiClient.VerifyTransactionAsync(request.TransactionReference);
+                if (verifyResponse.Status?.ToUpperInvariant() != "SUCCESS")
+                {
+                    throw new DomainException($"Transaction {request.TransactionReference} is not SUCCESS in Nomba system. Status: {verifyResponse.Status}");
+                }
+            }
+            
             // 1. Check Idempotency
             var alreadyProcessed = await _unitOfWork.Ledgers.HasWebhookBeenProcessedAsync(request.WebhookRequestId);
             if (alreadyProcessed)

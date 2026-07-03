@@ -6,17 +6,21 @@ using AjoCoreBackend.Application.DTOs;
 using AjoCoreBackend.Application.Interfaces.Repositories;
 using AjoCoreBackend.Domain.Entities;
 using AjoCoreBackend.Domain.Enum;
+using AjoCoreBackend.Application.Interfaces.Services;
 using MediatR;
+using System;
 
 namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetAllGroups
 {
     public class GetAllGroupsQueryHandler : IRequestHandler<GetAllGroupsQuery, List<CooperativeGroupDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetAllGroupsQueryHandler(IUnitOfWork unitOfWork)
+        public GetAllGroupsQueryHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
+            _currentUserService = currentUserService;
         }
 
         public async Task<List<AjoCoreBackend.Application.DTOs.CooperativeGroupDto>> Handle(GetAllGroupsQuery request, CancellationToken cancellationToken)
@@ -57,6 +61,18 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetAllGroups
                     }
                 }
 
+                string? membershipStatus = null;
+                if (Guid.TryParse(_currentUserService.UserId, out var userId))
+                {
+                    var memberships = await _unitOfWork.Repository<CooperativeGroupMember>()
+                        .FindAsync(m => m.CooperativeGroupId == group.Id && m.TraderId == userId);
+                    var mem = memberships.FirstOrDefault();
+                    if (mem != null)
+                    {
+                        membershipStatus = mem.Status.ToString();
+                    }
+                }
+
                 result.Add(new AjoCoreBackend.Application.DTOs.CooperativeGroupDto
                 {
                     Id = group.Id,
@@ -69,7 +85,8 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetAllGroups
                     SavingsGoal = cycles.Sum(c => c.ContributionAmount), // Wait, is SavingsGoal ContributionAmount * members? The prompt says "sum of all ContributionAmount values across all cycles"
                     TotalSaved = totalSaved,
                     IsActive = isActive,
-                    CreatedAt = group.CreatedAt
+                    CreatedAt = group.CreatedAt,
+                    MembershipStatus = membershipStatus
                 });
             }
 

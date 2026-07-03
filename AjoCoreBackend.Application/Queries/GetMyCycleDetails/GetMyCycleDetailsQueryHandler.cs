@@ -63,6 +63,7 @@ namespace AjoCoreBackend.Application.Queries.GetMyCycleDetails
                 EndDate = cycle.EndDate,
                 VirtualAccountNumber = vAccount?.AccountNumber,
                 VirtualAccountBank = vAccount?.BankName,
+                VirtualAccountName = vAccount?.AccountName,
                 PayoutOrder = member.PayoutOrder
             };
         }

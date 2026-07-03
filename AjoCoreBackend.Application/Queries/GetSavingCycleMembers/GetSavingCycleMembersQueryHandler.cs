@@ -33,7 +33,10 @@ namespace AjoCoreBackend.Application.Queries.GetSavingCycleMembers
             foreach (var member in cycle.Members)
             {
                 var vAccount = await _unitOfWork.Repository<NombaVirtualAccount>().GetByIdAsync(member.NombaVirtualAccountId);
-                
+                var trader = await _unitOfWork.Repository<Trader>().GetByIdAsync(member.UserId);
+                var contributions = await _unitOfWork.Repository<ContributionLedger>().FindAsync(c => c.SavingCycleMemberId == member.Id);
+                var totalContributed = contributions.Sum(c => c.Amount);
+
                 memberDtos.Add(new SavingCycleMemberDto
                 {
                     Id = member.Id,
@@ -42,7 +45,11 @@ namespace AjoCoreBackend.Application.Queries.GetSavingCycleMembers
                     VirtualAccountBank = vAccount?.BankName,
                     PayoutOrder = member.PayoutOrder,
                     Status = member.Status.ToString(),
-                    JoinedAt = member.CreatedAt
+                    JoinedAt = member.CreatedAt,
+                    UserId = member.UserId,
+                    TraderName = trader != null ? $"{trader.FirstName} {trader.LastName}" : "Unknown",
+                    TraderEmail = trader?.Email ?? "",
+                    TotalContributed = totalContributed
                 });
             }
 

@@ -14,6 +14,7 @@ namespace AjoCoreBackend.Application.DTOs
         public DateTime? EndDate { get; init; }
         public string? VirtualAccountNumber { get; init; }
         public string? VirtualAccountBank { get; init; }
+        public string? VirtualAccountName { get; init; }
         public int PayoutOrder { get; init; }
     }
 }

@@ -11,5 +11,9 @@ namespace AjoCoreBackend.Application.DTOs
         public int PayoutOrder { get; init; }
         public string Status { get; init; } = string.Empty;
         public DateTime JoinedAt { get; init; }
+        public Guid UserId { get; init; }
+        public string TraderName { get; init; } = string.Empty;
+        public string TraderEmail { get; init; } = string.Empty;
+        public decimal TotalContributed { get; init; }
     }
 }

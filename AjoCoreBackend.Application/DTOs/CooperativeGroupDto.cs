@@ -15,5 +15,6 @@ namespace AjoCoreBackend.Application.DTOs
         public decimal TotalSaved { get; init; }
         public bool IsActive { get; init; }
         public DateTime CreatedAt { get; init; }
+        public string? MembershipStatus { get; set; }
     }
 }

@@ -9,6 +9,7 @@ namespace AjoCoreBackend.Application.Commands.CreateSavingCycle
         public string CycleType { get; init; } = string.Empty;
         public decimal ContributionAmount { get; init; }
         public int IntervalDays { get; init; }
+        public int? DurationInIntervals { get; init; }
         public Guid? CooperativeGroupId { get; init; }
     }
 }

@@ -15,12 +15,13 @@ namespace AjoCoreBackend.Domain.Entities
         
         [NotMapped]
         public decimal IndividualTargetAmount =>
-        EndDate == null
+        EndDate == null || StartDate == null
          ? 0
          : ContributionAmount *
-           (((EndDate.Value - StartDate).Days / IntervalDays) + 1);
+           (((EndDate.Value - StartDate.Value).Days / IntervalDays) + 1);
 
-        public DateTime StartDate { get; set; }
+        public int? DurationInIntervals { get; set; }
+        public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public CycleStatus Status { get; set; }
         public Guid? CooperativeGroupId { get; set; }

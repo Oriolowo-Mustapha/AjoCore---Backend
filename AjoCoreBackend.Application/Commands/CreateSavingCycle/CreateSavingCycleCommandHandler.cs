@@ -38,7 +38,8 @@ namespace AjoCoreBackend.Application.Commands.CreateSavingCycle
                 ContributionAmount = request.ContributionAmount,
                 IntervalDays = request.IntervalDays,
                 Status = CycleStatus.Pending,
-                StartDate = _dateTimeProvider.UtcNow,
+                StartDate = null,
+                DurationInIntervals = cycleType == CycleType.Asca ? request.DurationInIntervals : null,
                 CooperativeGroupId = request.CooperativeGroupId
             };
 

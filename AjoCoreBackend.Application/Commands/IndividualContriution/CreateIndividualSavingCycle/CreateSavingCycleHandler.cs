@@ -67,7 +67,7 @@ namespace AjoCoreBackend.Application.Commands.IndividualContriution.CreateIndivi
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            _hangfireBackgroundService.ScheduleTask<CreateIndividualSavingCycleHandler>(x => x.UpdateCycleStatusSendNotification(newSavingCycle.Id, userId), newSavingCycle.StartDate.AddSeconds(5));
+            _hangfireBackgroundService.ScheduleTask<CreateIndividualSavingCycleHandler>(x => x.UpdateCycleStatusSendNotification(newSavingCycle.Id, userId), newSavingCycle.StartDate.Value.AddSeconds(5));
 
             return newSavingCycle.Id;
         }
@@ -101,7 +101,7 @@ namespace AjoCoreBackend.Application.Commands.IndividualContriution.CreateIndivi
                 <ul>
                     <li><strong>Contribution Amount:</strong> ₦{cycle.ContributionAmount:N2}</li>
                     <li><strong>Contribution Frequency:</strong> Every {cycle.IntervalDays} day(s)</li>
-                    <li><strong>Start Date:</strong> {cycle.StartDate:dddd, MMMM dd, yyyy}</li>
+                    <li><strong>Start Date:</strong> {cycle.StartDate.Value:dddd, MMMM dd, yyyy}</li>
                 </ul>
 
                 <p>Your first contribution is now due. Please ensure you make your contribution using your assigned virtual account to keep your participation active and on track.</p>

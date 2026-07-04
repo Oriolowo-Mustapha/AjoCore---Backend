@@ -50,7 +50,7 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
                         if (cycleWithMembers == null) continue;
 
                         // Simple interval calculation based on StartDate and IntervalDays
-                        var daysSinceStart = (now - cycle.StartDate).TotalDays;
+                        var daysSinceStart = (now - cycle.StartDate.Value).TotalDays;
                         var currentInterval = (int)(daysSinceStart / cycle.IntervalDays) + 1;
 
                         if (currentInterval > cycle.Members.Count)

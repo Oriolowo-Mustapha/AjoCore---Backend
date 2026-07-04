@@ -17,6 +17,7 @@ namespace AjoCoreBackend.Persistence.Repositories
         {
             return await _dbContext.SavingCycles
                 .Include(c => c.Members)
+                .ThenInclude(m => m.VirtualAccount)
                 .FirstOrDefaultAsync(c => c.Id == cycleId);
         }
 

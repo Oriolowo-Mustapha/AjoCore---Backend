@@ -41,11 +41,11 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
                     if (cycleWithMembers == null) continue;
 
                     // Calculate the current interval
-                    var daysSinceStart = (now - cycle.StartDate).TotalDays;
+                    var daysSinceStart = (now - cycle.StartDate.Value).TotalDays;
                     var currentInterval = (int)(daysSinceStart / cycle.IntervalDays) + 1;
                     
                     // Calculate next payment due date
-                    var nextDueDate = cycle.StartDate.AddDays(currentInterval * cycle.IntervalDays);
+                    var nextDueDate = cycle.StartDate.Value.AddDays(currentInterval * cycle.IntervalDays);
                     var daysUntilDue = (nextDueDate - now).TotalDays;
 
                     // If the next payment is due in exactly 1 day (or close to it)

@@ -10,7 +10,7 @@ namespace AjoCoreBackend.Application.DTOs
         public decimal ContributionAmount { get; init; }
         public int IntervalDays { get; init; }
         public string Status { get; init; } = string.Empty;
-        public DateTime StartDate { get; init; }
+        public DateTime? StartDate { get; init; }
         public DateTime? EndDate { get; init; }
         public string? VirtualAccountNumber { get; init; }
         public string? VirtualAccountBank { get; init; }

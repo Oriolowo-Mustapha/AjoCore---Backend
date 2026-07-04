@@ -12,8 +12,10 @@ namespace AjoCoreBackend.Application.DTOs
         public decimal ContributionAmount { get; init; }
         public int IntervalDays { get; init; }
         public string Status { get; init; } = string.Empty;
+        public Guid? CooperativeGroupId { get; init; }
         public decimal TargetAmount { get; init; }
-        public DateTime StartDate { get; init; }
+        public int? DurationInIntervals { get; init; }
+        public DateTime? StartDate { get; init; }
         public DateTime? EndDate { get; init; }
         public DateTime CreatedAt { get; init; }
         public decimal TotalSaved { get; init; }

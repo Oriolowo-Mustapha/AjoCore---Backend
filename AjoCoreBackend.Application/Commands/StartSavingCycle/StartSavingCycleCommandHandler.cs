@@ -63,16 +63,23 @@ namespace AjoCoreBackend.Application.Commands.StartSavingCycle
                         SlotNumber = i + 1,
                         IsAssigned = true,
                         AssignedMemberId = member.Id,
-                        // Estimated date assumes intervals run continuously from StartDate
-                        EstimatedPayoutDate = cycle.StartDate.AddDays(cycle.IntervalDays * (i + 1))
-                    };
-                    
-                    await slotsRepo.AddAsync(slot);
-                }
+                    // Estimated date assumes intervals run continuously from StartDate
+                    EstimatedPayoutDate = cycle.StartDate.Value.AddDays(cycle.IntervalDays * (i + 1))
+                };
                 
-                // Set cycle EndDate based on last slot
-                cycle.EndDate = cycle.StartDate.AddDays(cycle.IntervalDays * cycle.Members.Count);
+                await slotsRepo.AddAsync(slot);
             }
+            
+            // Set cycle EndDate based on last slot
+            cycle.EndDate = cycle.StartDate.Value.AddDays(cycle.IntervalDays * cycle.Members.Count);
+        }
+        else if (cycle.CycleType == CycleType.Asca)
+        {
+            if (cycle.DurationInIntervals.HasValue)
+            {
+                cycle.EndDate = cycle.StartDate.Value.AddDays(cycle.IntervalDays * cycle.DurationInIntervals.Value);
+            }
+        }
 
             _unitOfWork.SavingCycles.Update(cycle);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

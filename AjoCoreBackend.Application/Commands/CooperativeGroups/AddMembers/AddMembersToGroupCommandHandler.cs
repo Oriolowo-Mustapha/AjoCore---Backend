@@ -54,9 +54,20 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.AddMembers
 
             foreach (var memberDto in request.Members)
             {
-                // Try find by email only
+                // Try find by phone number or email in Traders
                 var existingTraders = await _unitOfWork.Repository<Trader>().FindAsync(t => 
                     t.Email.ToLower() == memberDto.Email.ToLower());
+                
+                // Try find by phone number or email in Admins
+                var existingAdmins = await _unitOfWork.Repository<CooperativeAdmin>().FindAsync(a => 
+                    a.PhoneNumber == memberDto.PhoneNumber || 
+                    a.Email.ToLower() == memberDto.Email.ToLower());
+
+                if (existingAdmins.Any())
+                {
+                    results.Add($"{memberDto.Email}: Cannot add this user because they are registered as a Cooperative Admin.");
+                    continue;
+                }
                 
                 var trader = existingTraders.FirstOrDefault();
                 bool isNewTrader = false;
@@ -74,7 +85,7 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.AddMembers
                         PhoneNumber = memberDto.PhoneNumber,
                         PasswordHash = _passwordHasher.HashPassword(generatedPassword),
                         Role = UserRole.Trader,
-                        DateOfBirth = memberDto.DateOfBirth,
+                        DateOfBirth = DateTime.SpecifyKind(memberDto.DateOfBirth, DateTimeKind.Utc),
                         IsEmailVerified = true, // Force verified since admin added them
                         IsKycCompleted = false,  // They MUST update their BVN to activate
                         PayoutAccountNumber = memberDto.PayoutAccountNumber,
@@ -100,7 +111,7 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.AddMembers
                 var membership = new CooperativeGroupMember
                 {
                     CooperativeGroupId = group.Id,
-                    TraderId = trader.Id,
+                    Trader = trader,
                     Status = ApprovalStatus.Approved,
                     ApprovedAt = DateTime.UtcNow
                 };

@@ -99,7 +99,7 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
                     PhoneNumber = request.PhoneNumber,
                     PasswordHash = _passwordHasher.HashPassword(request.Password),
                     Role = role,
-                    DateOfBirth = request.DateOfBirth,
+                    DateOfBirth = DateTime.SpecifyKind(request.DateOfBirth, DateTimeKind.Utc),
                     EmailVerificationToken = verificationToken,
                     IsEmailVerified = false,
                     Bvn = request.Bvn,

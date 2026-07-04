@@ -77,8 +77,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        var origin = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? ["http://localhost:5173"];
-        policy.WithOrigins(origin)
+        var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+        if (origins == null || origins.Length == 0)
+        {
+            origins = ["http://localhost:5173", "https://ajo-core-frontend-eta.vercel.app"];
+        }
+        
+        policy.WithOrigins(origins)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();

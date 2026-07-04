@@ -20,19 +20,22 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IEmailService _emailService;
         private readonly Microsoft.Extensions.Logging.ILogger<RegisterCommandHandler> _logger;
+        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
 
         public RegisterCommandHandler(
             IUnitOfWork unitOfWork,
             IPasswordHasher passwordHasher,
             IJwtTokenService jwtTokenService,
             IEmailService emailService,
-            Microsoft.Extensions.Logging.ILogger<RegisterCommandHandler> logger)
+            Microsoft.Extensions.Logging.ILogger<RegisterCommandHandler> logger,
+            Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _passwordHasher = passwordHasher;
             _jwtTokenService = jwtTokenService;
             _emailService = emailService;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public async Task<string> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -117,7 +120,8 @@ namespace AjoCoreBackend.Application.Commands.Auth.Register
             }
 
             // Send Verification Email
-            var verificationLink = $"https://your-frontend-url.com/verify-email?token={verificationToken}&email={userEmail}";
+            var frontendUrl = _configuration["FrontendUrl"] ?? "https://ajo-core-frontend-eta.vercel.app";
+            var verificationLink = $"{frontendUrl}/verify-email?token={verificationToken}&email={userEmail}";
             var emailBody = $"<h1>Welcome to AjoCore!</h1><p>Please verify your email by clicking <a href='{verificationLink}'>here</a>.</p><p>Alternatively, use this token: {verificationToken}</p>";
             _ = _emailService.SendEmailAsync(userEmail, "Verify your AjoCore Account", emailBody);
 

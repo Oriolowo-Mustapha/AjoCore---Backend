@@ -44,7 +44,7 @@ namespace AjoCoreBackend.Infrastructure.Extensions
             services.AddScoped<IHangfireBackGroundService, HangfireBackgroundService>();
             // Configure Email Settings
             services.Configure<AjoCoreBackend.Application.DTOs.Email.EmailSettings>(configuration.GetSection("EmailSettings"));
-            services.AddScoped<IEmailService, SmtpEmailService>();
+            services.AddHttpClient<IEmailService, BrevoEmailService>();
 
             // Register Background Jobs as Transient for Hangfire
             services.AddTransient<BackgroundJobs.LiquidationSweepService>();

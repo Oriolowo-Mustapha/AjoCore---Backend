@@ -22,7 +22,9 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetCooperativeAdminBalance
             var allCycles = await _unitOfWork.SavingCycles.FindAsync(c => c.CooperativeGroupId == request.CooperativeGroupId);
             var cycleIds = allCycles.Select(c => c.Id).ToList();
 
-            var contributions = await _unitOfWork.Ledgers.FindAsync(cl => cycleIds.Contains(cl.Member.SavingCycleId));
+            var contributions = await _unitOfWork.Ledgers.FindAsync(
+                cl => cycleIds.Contains(cl.Member.SavingCycleId), 
+                cl => cl.Member);
             
             var payoutsRepo = _unitOfWork.Repository<PayoutLedger>();
             var payouts = await payoutsRepo.FindAsync(pl => cycleIds.Contains(pl.Member.SavingCycleId));

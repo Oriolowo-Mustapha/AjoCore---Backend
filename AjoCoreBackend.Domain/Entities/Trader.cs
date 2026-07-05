@@ -32,5 +32,6 @@ namespace AjoCoreBackend.Domain.Entities
         // Navigation Properties
         public ICollection<CooperativeGroupMember> GroupMemberships { get; set; } = new List<CooperativeGroupMember>();
         public ICollection<InboundTransaction> Transactions { get; set; } = new List<InboundTransaction>();
+        public ICollection<SavingCycleMember> SavingCycleMembers { get; set; } = new List<SavingCycleMember>();
     }
 }

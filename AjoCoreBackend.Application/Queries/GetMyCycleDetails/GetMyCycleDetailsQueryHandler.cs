@@ -49,7 +49,7 @@ namespace AjoCoreBackend.Application.Queries.GetMyCycleDetails
                 throw new NotFoundException("You are not a member of this saving cycle.");
             }
 
-            var vAccount = await _unitOfWork.Repository<NombaVirtualAccount>().GetByIdAsync(member.NombaVirtualAccountId);
+            var vAccount = member.NombaVirtualAccountId.HasValue ? await _unitOfWork.Repository<NombaVirtualAccount>().GetByIdAsync(member.NombaVirtualAccountId.Value) : null;
 
             return new MyCycleDetailsDto
             {

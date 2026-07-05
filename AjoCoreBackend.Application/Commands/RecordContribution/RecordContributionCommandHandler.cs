@@ -65,8 +65,8 @@ namespace AjoCoreBackend.Application.Commands.RecordContribution
                 throw new NotFoundException($"Cycle not found.");
             }
 
-            // 4. Convert Kobo to Naira
-            var amountInNaira = request.Amount / 100m;
+            // 4. Amount is already in Naira
+            var amountInNaira = request.Amount;
 
             if (amountInNaira < cycle.ContributionAmount)
             {

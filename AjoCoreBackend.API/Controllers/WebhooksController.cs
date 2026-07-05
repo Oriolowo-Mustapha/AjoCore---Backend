@@ -45,10 +45,12 @@ namespace AjoCoreBackend.API.Controllers
                 var root = doc.RootElement;
                 
                 var data = root.GetProperty("data");
-                var webhookRequestId = root.GetProperty("id").GetString() ?? Guid.NewGuid().ToString();
-                var accountNumber = data.GetProperty("accountNumber").GetString() ?? "";
-                var amount = data.GetProperty("amount").GetDecimal(); // Kobo
-                var txRef = data.GetProperty("transactionReference").GetString() ?? "";
+                var transaction = data.GetProperty("transaction");
+
+                var webhookRequestId = root.TryGetProperty("requestId", out var reqIdProp) ? reqIdProp.GetString() : Guid.NewGuid().ToString();
+                var accountNumber = transaction.GetProperty("aliasAccountNumber").GetString() ?? "";
+                var amount = transaction.GetProperty("transactionAmount").GetDecimal(); // Naira
+                var txRef = transaction.GetProperty("transactionId").GetString() ?? "";
 
                 var command = new RecordContributionCommand
                 {

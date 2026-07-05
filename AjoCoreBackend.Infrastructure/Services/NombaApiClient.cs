@@ -13,12 +13,14 @@ namespace AjoCoreBackend.Infrastructure.Services
         private readonly HttpClient _httpClient;
         private readonly INombaTokenService _tokenService;
         private readonly string _accountId;
+        private readonly string _subAccountId;
 
         public NombaApiClient(HttpClient httpClient, INombaTokenService tokenService, Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
             _accountId = configuration["Nomba:AccountId"] ?? throw new ArgumentNullException("Nomba AccountId is missing in configuration.");
+            _subAccountId = configuration["Nomba:SubAccountId"] ?? throw new ArgumentNullException("Nomba SubAccountId is missing in configuration.");
         }
 
         private async Task SetAuthorizationHeaderAsync()
@@ -40,7 +42,7 @@ namespace AjoCoreBackend.Infrastructure.Services
         {
             await SetAuthorizationHeaderAsync();
             
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"/v1/accounts/virtual/{_accountId}");
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"/v1/accounts/virtual/{_subAccountId}");
             httpRequest.Headers.Add("accountId", _accountId);
             httpRequest.Content = JsonContent.Create(request);
 
@@ -73,7 +75,11 @@ namespace AjoCoreBackend.Infrastructure.Services
                 senderName = request.SenderName
             };
 
-            var response = await _httpClient.PostAsJsonAsync("/v1/transfers/bank", payload);
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/v1/transfers/bank");
+            httpRequest.Headers.Add("accountId", _subAccountId);
+            httpRequest.Content = JsonContent.Create(payload);
+
+            var response = await _httpClient.SendAsync(httpRequest);
             response.EnsureSuccessStatusCode();
             var wrapper = await response.Content.ReadFromJsonAsync<NombaApiResponse<BankTransferResponse>>();
             return wrapper?.Data ?? new BankTransferResponse();
@@ -93,7 +99,7 @@ namespace AjoCoreBackend.Infrastructure.Services
             await SetAuthorizationHeaderAsync();
             
             var request = new HttpRequestMessage(HttpMethod.Get, $"/v1/transactions/accounts/single?transactionRef={transactionReference}");
-            request.Headers.Add("accountId", _accountId);
+            request.Headers.Add("accountId", _subAccountId);
 
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();

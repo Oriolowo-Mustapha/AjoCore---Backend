@@ -22,11 +22,11 @@ namespace AjoCoreBackend.Infrastructure.Services
 
             using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_clientSecret));
             var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
-            var hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            var expectedSignature = Convert.ToBase64String(hash);
 
             return CryptographicOperations.FixedTimeEquals(
-                Encoding.UTF8.GetBytes(hashString),
-                Encoding.UTF8.GetBytes(signatureHeader.ToLowerInvariant())
+                Encoding.UTF8.GetBytes(expectedSignature),
+                Encoding.UTF8.GetBytes(signatureHeader)
             );
         }
     }

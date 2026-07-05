@@ -49,6 +49,7 @@ namespace AjoCoreBackend.Application.DTOs.Balances
         public Guid CycleId { get; init; }
         public string CycleName { get; init; } = string.Empty;
         public string CycleType { get; init; } = string.Empty;
+        public string CycleStatus { get; init; } = string.Empty;
         public decimal TargetAmount { get; init; }
         public decimal TotalPaid { get; init; }
         public decimal RemainingAmount => Math.Max(0, TargetAmount - TotalPaid);

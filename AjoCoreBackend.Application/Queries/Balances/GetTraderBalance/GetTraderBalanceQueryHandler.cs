@@ -62,6 +62,7 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetTraderBalance
                     CycleId = cycle.Id,
                     CycleName = cycle.Name,
                     CycleType = cycle.CycleType.ToString(),
+                    CycleStatus = cycle.Status.ToString(),
                     TargetAmount = targetAmount,
                     TotalPaid = totalPaid
                 });

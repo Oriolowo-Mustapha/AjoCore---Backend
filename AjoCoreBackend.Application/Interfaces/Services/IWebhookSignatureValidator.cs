@@ -1,7 +1,9 @@
+using AjoCoreBackend.Application.DTOs.Nomba;
+
 namespace AjoCoreBackend.Application.Interfaces.Services
 {
     public interface IWebhookSignatureValidator
     {
-        bool ValidateSignature(string payload, string signatureHeader);
+        bool ValidateSignature(HookPayload payload, string signatureHeader, string timestamp);
     }
 }

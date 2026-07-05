@@ -29,28 +29,46 @@ namespace AjoCoreBackend.API.Controllers
         public async Task<IActionResult> NombaWebhook()
         {
             var signatureHeader = Request.Headers["nomba-signature"].ToString();
+            var timestampHeader = Request.Headers["nomba-timestamp"].ToString();
+            
+            if (string.IsNullOrEmpty(timestampHeader))
+            {
+                timestampHeader = Request.Headers["x-nomba-timestamp"].ToString();
+            }
             
             using var reader = new StreamReader(Request.Body);
-            var payload = await reader.ReadToEndAsync();
+            var payloadStr = await reader.ReadToEndAsync();
 
-            if (!_signatureValidator.ValidateSignature(payload, signatureHeader))
+            AjoCoreBackend.Application.DTOs.Nomba.HookPayload? payload;
+            try
             {
-                _logger.LogWarning("Invalid webhook signature received from Nomba. Payload: {Payload}, Signature: {Signature}", payload, signatureHeader);
+                payload = JsonSerializer.Deserialize<AjoCoreBackend.Application.DTOs.Nomba.HookPayload>(payloadStr);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to deserialize Nomba webhook payload: {Payload}", payloadStr);
+                return Ok(); // Prevent retries
+            }
+
+            if (payload == null)
+            {
+                return Ok();
+            }
+
+            var timestamp = !string.IsNullOrEmpty(timestampHeader) ? timestampHeader : (payload.Data.Transaction?.Time ?? "");
+
+            if (!_signatureValidator.ValidateSignature(payload, signatureHeader, timestamp))
+            {
+                _logger.LogWarning("Invalid webhook signature received from Nomba. Payload: {Payload}, Signature: {Signature}", payloadStr, signatureHeader);
                 return Unauthorized("Invalid webhook signature.");
             }
 
             try
             {
-                using var doc = JsonDocument.Parse(payload);
-                var root = doc.RootElement;
-                
-                var data = root.GetProperty("data");
-                var transaction = data.GetProperty("transaction");
-
-                var webhookRequestId = root.TryGetProperty("requestId", out var reqIdProp) ? reqIdProp.GetString() : Guid.NewGuid().ToString();
-                var accountNumber = transaction.GetProperty("aliasAccountNumber").GetString() ?? "";
-                var amount = transaction.GetProperty("transactionAmount").GetDecimal(); // Naira
-                var txRef = transaction.GetProperty("transactionId").GetString() ?? "";
+                var webhookRequestId = payload.RequestId ?? Guid.NewGuid().ToString();
+                var accountNumber = payload.Data.Transaction?.AliasAccountNumber ?? "";
+                var amount = payload.Data.Transaction?.TransactionAmount ?? 0m;
+                var txRef = payload.Data.Transaction?.TransactionId ?? "";
 
                 var command = new RecordContributionCommand
                 {

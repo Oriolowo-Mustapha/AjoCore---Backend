@@ -92,6 +92,13 @@ namespace AjoCoreBackend.API.Controllers
             return Ok(cycle);
         }
 
+        [HttpGet("{id}/my-details")]
+        public async Task<IActionResult> GetMyDetails(Guid id)
+        {
+            var cycle = await _mediator.Send(new AjoCoreBackend.Application.Queries.GetMyCycleDetails.GetMyCycleDetailsQuery { SavingCycleId = id });
+            return Ok(cycle);
+        }
+
         [HttpGet("my-personal")]
         public async Task<IActionResult> GetMyPersonalCycles()
         {

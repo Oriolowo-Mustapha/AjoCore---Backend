@@ -56,7 +56,6 @@ namespace AjoCoreBackend.Application.Commands.CooperativeGroups.AddMembers
             {
                 // Try find by phone number or email in Traders
                 var existingTraders = await _unitOfWork.Repository<Trader>().FindAsync(t => 
-                    t.PhoneNumber == memberDto.PhoneNumber || 
                     t.Email.ToLower() == memberDto.Email.ToLower());
                 
                 // Try find by phone number or email in Admins

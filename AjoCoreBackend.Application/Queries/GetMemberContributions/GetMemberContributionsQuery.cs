@@ -5,7 +5,7 @@ using MediatR;
 
 namespace AjoCoreBackend.Application.Queries.GetMemberContributions
 {
-    public record GetMemberContributionsQuery : IRequest<List<ContributionLedgerDto>>
+    public record GetMemberContributionsQuery : IRequest<MemberContributionsResponseDto>
     {
         public Guid SavingCycleMemberId { get; init; }
     }

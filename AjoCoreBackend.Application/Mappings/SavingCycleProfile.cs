@@ -26,7 +26,8 @@ namespace AjoCoreBackend.Application.Mappings
                 .ForMember(dest => dest.ApprovalStatus, opt => opt.MapFrom(src => src.ApprovalStatus.ToString()))
                 .ForMember(dest => dest.JoinedAt, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(dest => dest.TraderName, opt => opt.MapFrom(src => src.Trader != null ? $"{src.Trader.FirstName} {src.Trader.LastName}" : string.Empty))
-                .ForMember(dest => dest.TraderEmail, opt => opt.MapFrom(src => src.Trader != null ? src.Trader.Email : string.Empty));
+                .ForMember(dest => dest.TraderEmail, opt => opt.MapFrom(src => src.Trader != null ? src.Trader.Email : string.Empty))
+                .ForMember(dest => dest.TotalContributed, opt => opt.MapFrom(src => src.Contributions != null ? src.Contributions.Sum(c => c.Amount) : 0));
             // Flatten the nested VirtualAccount properties directly onto the DTO
             CreateMap<SavingCycleMember, IndividualSavingCycleDto>()
                 .ForMember(dest => dest.VirtualAccountNumber, opt => opt.MapFrom(src => src.VirtualAccount != null ? src.VirtualAccount.AccountNumber : null))

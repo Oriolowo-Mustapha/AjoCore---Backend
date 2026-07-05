@@ -20,6 +20,8 @@ namespace AjoCoreBackend.Persistence.Repositories
                     .ThenInclude(m => m.Trader)
                 .Include(c => c.Members)
                     .ThenInclude(m => m.VirtualAccount)
+                .Include(c => c.Members)
+                    .ThenInclude(m => m.Contributions)
                 .FirstOrDefaultAsync(c => c.Id == cycleId);
         }
 

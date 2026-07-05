@@ -23,7 +23,10 @@ namespace AjoCoreBackend.Application.Mappings
                 .ForMember(dest => dest.VirtualAccountNumber, opt => opt.MapFrom(src => src.VirtualAccount != null ? src.VirtualAccount.AccountNumber : null))
                 .ForMember(dest => dest.VirtualAccountBank, opt => opt.MapFrom(src => src.VirtualAccount != null ? src.VirtualAccount.BankName : null))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-                .ForMember(dest => dest.JoinedAt, opt => opt.MapFrom(src => src.CreatedAt));
+                .ForMember(dest => dest.ApprovalStatus, opt => opt.MapFrom(src => src.ApprovalStatus.ToString()))
+                .ForMember(dest => dest.JoinedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.TraderName, opt => opt.MapFrom(src => src.Trader != null ? $"{src.Trader.FirstName} {src.Trader.LastName}" : string.Empty))
+                .ForMember(dest => dest.TraderEmail, opt => opt.MapFrom(src => src.Trader != null ? src.Trader.Email : string.Empty));
             // Flatten the nested VirtualAccount properties directly onto the DTO
             CreateMap<SavingCycleMember, IndividualSavingCycleDto>()
                 .ForMember(dest => dest.VirtualAccountNumber, opt => opt.MapFrom(src => src.VirtualAccount != null ? src.VirtualAccount.AccountNumber : null))

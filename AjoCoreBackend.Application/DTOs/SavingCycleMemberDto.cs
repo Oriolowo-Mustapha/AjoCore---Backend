@@ -9,7 +9,8 @@ namespace AjoCoreBackend.Application.DTOs
         public string? VirtualAccountNumber { get; init; }
         public string? VirtualAccountBank { get; init; }
         public int PayoutOrder { get; init; }
-        public string Status { get; init; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string ApprovalStatus { get; init; } = string.Empty;
         public DateTime JoinedAt { get; init; }
         public Guid UserId { get; init; }
         public string TraderName { get; init; } = string.Empty;

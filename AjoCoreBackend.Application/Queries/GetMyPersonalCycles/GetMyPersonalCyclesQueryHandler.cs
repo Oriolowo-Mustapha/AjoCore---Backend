@@ -40,7 +40,7 @@ namespace AjoCoreBackend.Application.Queries.GetMyPersonalCycles
                 var member = cycleMembers.FirstOrDefault();
                 if (member != null)
                 {
-                    var vAccount = await _unitOfWork.Repository<NombaVirtualAccount>().GetByIdAsync(member.NombaVirtualAccountId);
+                    var vAccount = member.NombaVirtualAccountId.HasValue ? await _unitOfWork.Repository<NombaVirtualAccount>().GetByIdAsync(member.NombaVirtualAccountId.Value) : null;
 
                     personalCycles.Add(new SavingCycleDto
                     {

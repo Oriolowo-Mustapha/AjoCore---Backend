@@ -46,6 +46,28 @@ namespace AjoCoreBackend.Application.Queries.GetMyCycleDetails
 
             if (member == null)
             {
+                if (cycle.CooperativeGroupId.HasValue)
+                {
+                    var group = await _unitOfWork.Repository<CooperativeGroup>().GetByIdAsync(cycle.CooperativeGroupId.Value);
+                    if (group != null && group.CooperativeAdminId == userId)
+                    {
+                        return new MyCycleDetailsDto
+                        {
+                            CycleId = cycle.Id,
+                            Name = cycle.Name,
+                            CycleType = cycle.CycleType.ToString(),
+                            ContributionAmount = cycle.ContributionAmount,
+                            IntervalDays = cycle.IntervalDays,
+                            Status = cycle.Status.ToString(),
+                            StartDate = cycle.StartDate,
+                            EndDate = cycle.EndDate,
+                            VirtualAccountNumber = null,
+                            VirtualAccountBank = null,
+                            VirtualAccountName = null,
+                            PayoutOrder = 0
+                        };
+                    }
+                }
                 throw new NotFoundException("You are not a member of this saving cycle.");
             }
 

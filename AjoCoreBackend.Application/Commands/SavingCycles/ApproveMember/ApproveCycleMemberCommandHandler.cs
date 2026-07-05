@@ -46,11 +46,15 @@ namespace AjoCoreBackend.Application.Commands.SavingCycles.ApproveMember
 
             var virtualAccount = new NombaVirtualAccount
             {
+                Id = Guid.NewGuid(),
                 AccountNumber = virtualAccountResponse.AccountNumber,
                 BankName = virtualAccountResponse.BankName,
                 AccountName = virtualAccountResponse.AccountName
             };
 
+            await _unitOfWork.Repository<NombaVirtualAccount>().AddAsync(virtualAccount);
+
+            member.NombaVirtualAccountId = virtualAccount.Id;
             member.VirtualAccount = virtualAccount;
             member.ApprovalStatus = ApprovalStatus.Approved;
             member.Status = MemberStatus.Active;

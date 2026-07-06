@@ -15,7 +15,15 @@ namespace AjoCoreBackend.Application.Mappings
                 .ForMember(dest => dest.CycleType, opt => opt.MapFrom(src => src.CycleType.ToString()))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(dest => dest.TotalSaved, opt => opt.MapFrom(src => 
-                    src.Members != null ? src.Members.SelectMany(m => m.Contributions ?? new System.Collections.Generic.List<ContributionLedger>()).Sum(c => c.Amount) : 0));
+                    src.Members != null ? src.Members.SelectMany(m => m.Contributions ?? new System.Collections.Generic.List<ContributionLedger>()).Sum(c => c.Amount) : 0))
+                .ForMember(dest => dest.TargetAmount, opt => opt.MapFrom(src => 
+                    src.CycleType == Domain.Enum.CycleType.Rosca && src.Members != null
+                        ? src.ContributionAmount * src.Members.Count
+                    : src.CycleType == Domain.Enum.CycleType.Asca && src.DurationInIntervals.HasValue
+                        ? src.ContributionAmount * src.DurationInIntervals.Value
+                    : src.CycleType == Domain.Enum.CycleType.Personal
+                        ? src.IndividualTargetAmount 
+                    : src.IndividualTargetAmount));
 
             // SavingCycleMember → SavingCycleMemberDto
             // Flatten the nested VirtualAccount properties directly onto the DTO

@@ -54,6 +54,30 @@ namespace AjoCoreBackend.API.Controllers
         }
 
         /// <summary>
+        /// Update the currently logged-in Trader's BVN.
+        /// </summary>
+        [HttpPut("trader/bvn")]
+        [Authorize(Roles = "Trader")]
+        [ProducesResponseType(typeof(TraderProfileDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateTraderBvn([FromBody] AjoCoreBackend.Application.Commands.Profile.UpdateTraderBvn.UpdateTraderBvnCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { success = true, data = result });
+        }
+
+        /// <summary>
+        /// Update the currently logged-in Trader's Payout Details.
+        /// </summary>
+        [HttpPut("trader/payout")]
+        [Authorize(Roles = "Trader")]
+        [ProducesResponseType(typeof(TraderProfileDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateTraderPayout([FromBody] AjoCoreBackend.Application.Commands.Profile.UpdateTraderPayout.UpdateTraderPayoutCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { success = true, data = result });
+        }
+
+        /// <summary>
         /// Get the currently logged-in Cooperative Admin's profile.
         /// </summary>
         [HttpGet("cooperative-admin")]

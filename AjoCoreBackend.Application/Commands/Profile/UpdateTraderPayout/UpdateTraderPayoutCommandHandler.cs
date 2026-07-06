@@ -8,58 +8,42 @@ using AjoCoreBackend.Domain.Exceptions;
 using AutoMapper;
 using MediatR;
 
-namespace AjoCoreBackend.Application.Commands.Profile.UpdateTraderProfile
+namespace AjoCoreBackend.Application.Commands.Profile.UpdateTraderPayout
 {
-    public class UpdateTraderProfileCommandHandler : IRequestHandler<UpdateTraderProfileCommand, TraderProfileDto>
+    public class UpdateTraderPayoutCommandHandler : IRequestHandler<UpdateTraderPayoutCommand, TraderProfileDto>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
         private readonly IMapper _mapper;
 
-        public UpdateTraderProfileCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, IMapper mapper)
+        public UpdateTraderPayoutCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _mapper = mapper;
         }
 
-        public async Task<TraderProfileDto> Handle(UpdateTraderProfileCommand request, CancellationToken cancellationToken)
+        public async Task<TraderProfileDto> Handle(UpdateTraderPayoutCommand request, CancellationToken cancellationToken)
         {
             var userId = _currentUserService.UserGuid;
-            if (!userId.HasValue)
-            {
-                throw new ForbiddenAccessException("User not authenticated.");
-            }
+            if (!userId.HasValue) throw new ForbiddenAccessException("User not authenticated.");
 
             var trader = await _unitOfWork.Repository<Trader>().GetByIdAsync(userId.Value);
-            if (trader == null)
-            {
-                throw new NotFoundException($"Trader with ID {userId.Value} not found.");
-            }
+            if (trader == null) throw new NotFoundException($"Trader with ID {userId.Value} not found.");
 
-            // Update allowed fields
-            trader.FirstName = request.FirstName;
-            trader.LastName = request.LastName;
-            trader.PhoneNumber = request.PhoneNumber;
-            trader.DateOfBirth = System.DateTime.SpecifyKind(request.DateOfBirth, System.DateTimeKind.Utc);
+            trader.PayoutAccountNumber = request.PayoutAccountNumber;
+            trader.PayoutBankName = request.PayoutBankName;
+            trader.PayoutAccountName = request.PayoutAccountName;
             trader.UpdatedAt = System.DateTime.UtcNow;
 
             _unitOfWork.Repository<Trader>().Update(trader);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var dto = _mapper.Map<TraderProfileDto>(trader);
-
-            // Mask BVN (only show last 4 digits)
             if (!string.IsNullOrEmpty(dto.Bvn) && dto.Bvn.Length > 4)
-            {
                 dto.Bvn = new string('*', dto.Bvn.Length - 4) + dto.Bvn.Substring(dto.Bvn.Length - 4);
-            }
-
-            // Mask PayoutAccountNumber (only show last 4 digits)
             if (!string.IsNullOrEmpty(dto.PayoutAccountNumber) && dto.PayoutAccountNumber.Length > 4)
-            {
                 dto.PayoutAccountNumber = new string('*', dto.PayoutAccountNumber.Length - 4) + dto.PayoutAccountNumber.Substring(dto.PayoutAccountNumber.Length - 4);
-            }
 
             return dto;
         }

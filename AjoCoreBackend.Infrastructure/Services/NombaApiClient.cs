@@ -75,8 +75,8 @@ namespace AjoCoreBackend.Infrastructure.Services
                 senderName = request.SenderName
             };
 
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/v1/transfers/bank");
-            httpRequest.Headers.Add("accountId", _subAccountId);
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"/v2/transfers/bank/{_subAccountId}");
+            httpRequest.Headers.Add("accountId", _accountId);
             httpRequest.Content = JsonContent.Create(payload);
 
             var response = await _httpClient.SendAsync(httpRequest);

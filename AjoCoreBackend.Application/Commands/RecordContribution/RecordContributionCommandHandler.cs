@@ -5,6 +5,7 @@ using AjoCoreBackend.Domain.Entities;
 using AjoCoreBackend.Domain.Enum;
 using AjoCoreBackend.Domain.Exceptions;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace AjoCoreBackend.Application.Commands.RecordContribution
 {

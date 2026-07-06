@@ -70,5 +70,43 @@ namespace AjoCoreBackend.API.Controllers
             var result = await _mediator.Send(new GetTraderBalanceQuery { TraderId = traderId });
             return Ok(result);
         }
+
+        /// <summary>
+        /// Get the actual Nomba subaccount wallet balance. Cooperative Admin only.
+        /// </summary>
+        [HttpGet("nomba-wallet")]
+        [Authorize(Roles = "CooperativeAdmin")]
+        public async Task<IActionResult> GetNombaWalletBalance([FromServices] AjoCoreBackend.Application.Interfaces.Services.INombaApiClient nombaApiClient)
+        {
+            try
+            {
+                var balanceResponse = await nombaApiClient.FetchAccountBalanceAsync();
+                return Ok(balanceResponse);
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to fetch Nomba wallet balance", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Manually withdraw funds from the Nomba subaccount to a designated bank account. Cooperative Admin only.
+        /// </summary>
+        [HttpPost("withdraw-nomba-funds")]
+        [Authorize(Roles = "CooperativeAdmin")]
+        public async Task<IActionResult> WithdrawNombaFunds(
+            [FromServices] AjoCoreBackend.Application.Interfaces.Services.INombaApiClient nombaApiClient,
+            [FromBody] AjoCoreBackend.Application.DTOs.Nomba.BankTransferRequest request)
+        {
+            try
+            {
+                var response = await nombaApiClient.ExecuteBankTransferAsync(request);
+                return Ok(response);
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to execute Nomba withdrawal", error = ex.Message });
+            }
+        }
     }
 }

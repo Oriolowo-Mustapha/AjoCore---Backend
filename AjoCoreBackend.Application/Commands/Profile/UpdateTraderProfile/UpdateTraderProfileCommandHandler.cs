@@ -42,6 +42,19 @@ namespace AjoCoreBackend.Application.Commands.Profile.UpdateTraderProfile
             trader.LastName = request.LastName;
             trader.PhoneNumber = request.PhoneNumber;
             trader.DateOfBirth = request.DateOfBirth;
+            
+            if (!string.IsNullOrEmpty(request.Bvn))
+                trader.Bvn = request.Bvn;
+                
+            if (!string.IsNullOrEmpty(request.PayoutAccountNumber))
+                trader.PayoutAccountNumber = request.PayoutAccountNumber;
+                
+            if (!string.IsNullOrEmpty(request.PayoutBankName))
+                trader.PayoutBankName = request.PayoutBankName;
+                
+            if (!string.IsNullOrEmpty(request.PayoutAccountName))
+                trader.PayoutAccountName = request.PayoutAccountName;
+
             trader.UpdatedAt = System.DateTime.UtcNow;
 
             _unitOfWork.Repository<Trader>().Update(trader);

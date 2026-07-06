@@ -83,5 +83,36 @@ namespace AjoCoreBackend.API.Controllers
             var result = await _mediator.Send(command);
             return Ok(new { success = true, data = result });
         }
+
+        /// <summary>
+        /// Get the currently logged-in System Admin's profile.
+        /// </summary>
+        [HttpGet("system-admin")]
+        [Authorize(Roles = "SystemAdmin")]
+        [ProducesResponseType(typeof(AjoCoreBackend.Application.DTOs.Profile.SystemAdminProfileDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetSystemAdminProfile()
+        {
+            var result = await _mediator.Send(new AjoCoreBackend.Application.Queries.Profile.GetSystemAdminProfile.GetSystemAdminProfileQuery());
+            return Ok(new { success = true, data = result });
+        }
+
+        /// <summary>
+        /// Update the currently logged-in System Admin's profile.
+        /// </summary>
+        [HttpPut("system-admin")]
+        [Authorize(Roles = "SystemAdmin")]
+        [ProducesResponseType(typeof(AjoCoreBackend.Application.DTOs.Profile.SystemAdminProfileDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateSystemAdminProfile([FromBody] AjoCoreBackend.Application.Commands.Profile.UpdateSystemAdminProfile.UpdateSystemAdminProfileCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { success = true, data = result });
+        }
     }
 }

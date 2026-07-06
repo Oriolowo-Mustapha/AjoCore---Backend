@@ -41,7 +41,7 @@ namespace AjoCoreBackend.Application.Commands.RecordContribution
                 try 
                 {
                     var verifyResponse = await _nombaApiClient.VerifyTransactionAsync(request.TransactionReference);
-                    if (verifyResponse.Status?.ToUpperInvariant() != "SUCCESS")
+                    if (verifyResponse.Status?.ToUpperInvariant() != "SUCCESS" && verifyResponse.Status?.ToUpperInvariant() != "PAYMENT_SUCCESSFUL")
                     {
                         _logger.LogWarning("Transaction {TxRef} verification failed. Status: {Status}", request.TransactionReference, verifyResponse.Status);
                         throw new DomainException($"Transaction {request.TransactionReference} is not SUCCESS in Nomba system. Status: {verifyResponse.Status}");

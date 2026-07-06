@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using AjoCoreBackend.Application.DTOs.Profile;
-using AjoCoreBackend.Application.Exceptions;
+using AjoCoreBackend.Domain.Exceptions;
 using AjoCoreBackend.Application.Interfaces.Repositories;
 using AjoCoreBackend.Application.Interfaces.Services;
 using AjoCoreBackend.Domain.Entities;
@@ -32,7 +32,7 @@ namespace AjoCoreBackend.Application.Queries.Profile.GetSystemAdminProfile
             var admin = await _unitOfWork.Repository<SystemAdmin>().GetByIdAsync(parsedUserId);
             if (admin == null)
             {
-                throw new NotFoundException(nameof(SystemAdmin), parsedUserId);
+                throw new NotFoundException($"SystemAdmin with ID {parsedUserId} not found.");
             }
 
             return new SystemAdminProfileDto
@@ -41,7 +41,6 @@ namespace AjoCoreBackend.Application.Queries.Profile.GetSystemAdminProfile
                 FirstName = admin.FirstName,
                 LastName = admin.LastName,
                 Email = admin.Email,
-                PhoneNumber = admin.PhoneNumber,
                 Role = admin.Role.ToString()
             };
         }

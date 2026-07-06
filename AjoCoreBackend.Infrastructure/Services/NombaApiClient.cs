@@ -67,7 +67,7 @@ namespace AjoCoreBackend.Infrastructure.Services
             
             var payload = new
             {
-                amount = (long)(request.Amount * 100), // Convert decimal Naira to integer Kobo
+                amount = request.Amount, // Nomba v2 API expects amount in Naira, not Kobo
                 accountNumber = request.AccountNumber,
                 accountName = request.AccountName,
                 bankCode = request.BankCode,

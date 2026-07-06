@@ -28,8 +28,11 @@ namespace AjoCoreBackend.Application.DTOs.Nomba
 
     public record FetchAccountBalanceResponse
     {
-        [System.Text.Json.Serialization.JsonPropertyName("balance")]
-        public decimal Balance { get; init; }
+        // Nomba returns 'amount' as a string like "281946.0"
+        [System.Text.Json.Serialization.JsonPropertyName("amount")]
+        public string AmountString { get; init; } = "0";
+
+        public decimal Balance => decimal.TryParse(AmountString, out var val) ? val : 0;
 
         [System.Text.Json.Serialization.JsonPropertyName("currency")]
         public string Currency { get; init; } = "NGN";

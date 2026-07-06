@@ -11,5 +11,6 @@ namespace AjoCoreBackend.Application.Interfaces.Services
         Task<BankTransferResponse> ExecuteBankTransferAsync(BankTransferRequest request);
         Task<FetchBanksResponse> FetchBanksAsync();
         Task<VerifyTransactionResponse> VerifyTransactionAsync(string transactionReference);
+        Task<FetchAccountBalanceResponse> FetchAccountBalanceAsync();
     }
 }

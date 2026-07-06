@@ -26,6 +26,15 @@ namespace AjoCoreBackend.Application.DTOs.Nomba
         public string Code { get; init; } = string.Empty;
     }
 
+    public record FetchAccountBalanceResponse
+    {
+        [System.Text.Json.Serialization.JsonPropertyName("balance")]
+        public decimal Balance { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("currency")]
+        public string Currency { get; init; } = "NGN";
+    }
+
     // Virtual Account Models
     public record CreateVirtualAccountRequest
     {

@@ -107,5 +107,20 @@ namespace AjoCoreBackend.Infrastructure.Services
             var wrapper = await response.Content.ReadFromJsonAsync<NombaApiResponse<VerifyTransactionResponse>>();
             return wrapper?.Data ?? new VerifyTransactionResponse();
         }
+
+        public async Task<FetchAccountBalanceResponse> FetchAccountBalanceAsync()
+        {
+            await SetAuthorizationHeaderAsync();
+            
+            var request = new HttpRequestMessage(HttpMethod.Get, "/v1/accounts/balance");
+            // Since we want the subaccount balance, we pass the subaccountId in the header
+            request.Headers.Add("accountId", _subAccountId);
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            
+            var wrapper = await response.Content.ReadFromJsonAsync<NombaApiResponse<FetchAccountBalanceResponse>>();
+            return wrapper?.Data ?? new FetchAccountBalanceResponse();
+        }
     }
 }

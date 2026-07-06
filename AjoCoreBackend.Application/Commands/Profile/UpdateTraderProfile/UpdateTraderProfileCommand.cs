@@ -10,5 +10,9 @@ namespace AjoCoreBackend.Application.Commands.Profile.UpdateTraderProfile
         public string LastName { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
+        public string? Bvn { get; set; }
+        public string? PayoutAccountNumber { get; set; }
+        public string? PayoutBankName { get; set; }
+        public string? PayoutAccountName { get; set; }
     }
 }

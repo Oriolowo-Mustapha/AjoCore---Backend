@@ -11,6 +11,9 @@ using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 // Load environment variables from .env file
 DotNetEnv.Env.Load();
@@ -91,6 +94,25 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Automatically apply pending migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AjoCoreBackend.Persistence.Contexts.AjoCoreDbContext>();
+        if (context.Database.IsRelational())
+        {
+            context.Database.Migrate();
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
+}
 
 app.UseHangfireDashboard("/hangfire");
 

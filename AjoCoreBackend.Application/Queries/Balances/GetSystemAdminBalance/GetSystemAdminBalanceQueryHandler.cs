@@ -38,12 +38,14 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetSystemAdminBalance
             decimal pendingContributions = 0;
             foreach (var cycle in activeCycles)
             {
-                var cycleMembersCount = (await _unitOfWork.SavingCycleMembers.FindAsync(m => m.SavingCycleId == cycle.Id)).Count();
+                var cycleMembers = (await _unitOfWork.SavingCycleMembers.FindAsync(m => m.SavingCycleId == cycle.Id)).ToList();
+                var cycleMembersCount = cycleMembers.Count;
                 var cycleTarget = cycle.CycleType == Domain.Enum.CycleType.Rosca 
                     ? cycle.ContributionAmount * cycleMembersCount 
                     : cycle.IndividualTargetAmount * cycleMembersCount;
 
-                var cycleTotalPaid = contributions.Where(c => c.Member.SavingCycleId == cycle.Id).Sum(c => c.Amount);
+                var cycleMemberIds = cycleMembers.Select(m => m.Id).ToList();
+                var cycleTotalPaid = contributions.Where(c => cycleMemberIds.Contains(c.SavingCycleMemberId)).Sum(c => c.Amount);
                 pendingContributions += System.Math.Max(0, cycleTarget - cycleTotalPaid);
             }
 

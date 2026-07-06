@@ -99,7 +99,7 @@ namespace AjoCoreBackend.Infrastructure.Services
             await SetAuthorizationHeaderAsync();
             
             var request = new HttpRequestMessage(HttpMethod.Get, $"/v1/transactions/accounts/single?transactionRef={transactionReference}");
-            request.Headers.Add("accountId", _accountId);
+            request.Headers.Add("accountId", _subAccountId);
 
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();

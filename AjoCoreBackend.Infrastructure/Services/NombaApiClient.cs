@@ -112,7 +112,7 @@ namespace AjoCoreBackend.Infrastructure.Services
         {
             await SetAuthorizationHeaderAsync();
             
-            var request = new HttpRequestMessage(HttpMethod.Get, "/v1/accounts/balance");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/v1/accounts/{_subAccountId}/balance");
             request.Headers.Add("accountId", _accountId);
 
             var response = await _httpClient.SendAsync(request);

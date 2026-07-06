@@ -32,6 +32,9 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetSystemAdminBalance
             var totalMembers = (await _unitOfWork.Repository<CooperativeGroupMember>()
                 .FindAsync(m => m.Status == Domain.Enum.ApprovalStatus.Approved)).Count();
 
+            var totalTraders = (await _unitOfWork.Repository<Trader>().GetAllAsync()).Count();
+            var totalCooperativeAdmins = (await _unitOfWork.Repository<CooperativeAdmin>().GetAllAsync()).Count();
+
             decimal pendingContributions = 0;
             foreach (var cycle in activeCycles)
             {
@@ -50,6 +53,8 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetSystemAdminBalance
                 TotalGroups = totalGroups,
                 TotalMembers = totalMembers,
                 PendingContributions = pendingContributions,
+                Traders = totalTraders,
+                CooperativeAdmins = totalCooperativeAdmins,
                 TotalContributions = contributions.Sum(c => c.Amount),
                 TotalPayouts = payouts.Sum(p => p.Amount),
                 TotalReversals = successfulReversals.Sum(r => r.Amount)

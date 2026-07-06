@@ -14,29 +14,47 @@ namespace AjoCoreBackend.Application.Commands.RecordContribution
         private readonly IDateTimeProvider _dateTimeProvider;
         private readonly IHangfireBackGroundService _hangfireService;
         private readonly INombaApiClient _nombaApiClient;
+        private readonly Microsoft.Extensions.Logging.ILogger<RecordContributionCommandHandler> _logger;
 
         public RecordContributionCommandHandler(
             IUnitOfWork unitOfWork,
             IDateTimeProvider dateTimeProvider,
             IHangfireBackGroundService hangfireService,
-            INombaApiClient nombaApiClient)
+            INombaApiClient nombaApiClient,
+            Microsoft.Extensions.Logging.ILogger<RecordContributionCommandHandler> logger)
         {
             _unitOfWork = unitOfWork;
             _dateTimeProvider = dateTimeProvider;
             _hangfireService = hangfireService;
             _nombaApiClient = nombaApiClient;
+            _logger = logger;
         }
 
         public async Task<Guid> Handle(RecordContributionCommand request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Processing webhook contribution for RequestId: {RequestId}, Account: {AccountNumber}, Amount: {Amount}", request.WebhookRequestId, request.AccountNumber, request.Amount);
+
             // 0. Verify Transaction with Nomba (Security best practice)
             if (!string.IsNullOrEmpty(request.TransactionReference))
             {
-                var verifyResponse = await _nombaApiClient.VerifyTransactionAsync(request.TransactionReference);
-                if (verifyResponse.Status?.ToUpperInvariant() != "SUCCESS")
+                try 
                 {
-                    throw new DomainException($"Transaction {request.TransactionReference} is not SUCCESS in Nomba system. Status: {verifyResponse.Status}");
+                    var verifyResponse = await _nombaApiClient.VerifyTransactionAsync(request.TransactionReference);
+                    if (verifyResponse.Status?.ToUpperInvariant() != "SUCCESS")
+                    {
+                        _logger.LogWarning("Transaction {TxRef} verification failed. Status: {Status}", request.TransactionReference, verifyResponse.Status);
+                        throw new DomainException($"Transaction {request.TransactionReference} is not SUCCESS in Nomba system. Status: {verifyResponse.Status}");
+                    }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Exception during transaction verification for TxRef: {TxRef}", request.TransactionReference);
+                    throw;
+                }
+            }
+            else 
+            {
+                _logger.LogWarning("Transaction reference is empty. Skipping verification.");
             }
             
             // 1. Check Idempotency
@@ -47,6 +65,7 @@ namespace AjoCoreBackend.Application.Commands.RecordContribution
             }
 
             // 2. Find Member by NUBAN
+            _logger.LogInformation("Looking for SavingCycleMember with Virtual Account Number: {AccountNumber}", request.AccountNumber);
             var members = await _unitOfWork.SavingCycleMembers.FindAsync(m => 
                 m.VirtualAccount != null && 
                 m.VirtualAccount.AccountNumber == request.AccountNumber);
@@ -55,8 +74,11 @@ namespace AjoCoreBackend.Application.Commands.RecordContribution
 
             if (member == null)
             {
+                _logger.LogWarning("No member found assigned to virtual account {AccountNumber}.", request.AccountNumber);
                 throw new NotFoundException($"No member found assigned to virtual account {request.AccountNumber}.");
             }
+            
+            _logger.LogInformation("Found member with ID: {MemberId} for AccountNumber: {AccountNumber}", member.Id, request.AccountNumber);
 
             // 3. Fetch Cycle to check required amount
             var cycle = await _unitOfWork.SavingCycles.GetByIdAsync(member.SavingCycleId);

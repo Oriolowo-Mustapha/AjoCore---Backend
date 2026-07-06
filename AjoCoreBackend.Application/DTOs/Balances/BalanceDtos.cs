@@ -12,6 +12,9 @@ namespace AjoCoreBackend.Application.DTOs.Balances
         public decimal TotalPayouts { get; init; }
         public decimal TotalReversals { get; init; }
         public decimal PendingContributions { get; init; }
+        public int Traders { get; init; }
+        public int CooperativeAdmins { get; init; }
+        public int TotalUsers => Traders + CooperativeAdmins;
         public decimal SystemWalletBalance => TotalContributions - TotalPayouts - TotalReversals;
     }
 

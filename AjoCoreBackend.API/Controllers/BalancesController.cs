@@ -72,10 +72,10 @@ namespace AjoCoreBackend.API.Controllers
         }
 
         /// <summary>
-        /// Get the actual Nomba subaccount wallet balance. Cooperative Admin only.
+        /// Get the actual Nomba subaccount wallet balance. System Admin only.
         /// </summary>
         [HttpGet("nomba-wallet")]
-        [Authorize(Roles = "CooperativeAdmin")]
+        [Authorize(Roles = "SystemAdmin")]
         public async Task<IActionResult> GetNombaWalletBalance([FromServices] AjoCoreBackend.Application.Interfaces.Services.INombaApiClient nombaApiClient)
         {
             try
@@ -90,10 +90,10 @@ namespace AjoCoreBackend.API.Controllers
         }
 
         /// <summary>
-        /// Manually withdraw funds from the Nomba subaccount to a designated bank account. Cooperative Admin only.
+        /// Manually withdraw funds from the Nomba subaccount to a designated bank account. System Admin only.
         /// </summary>
         [HttpPost("withdraw-nomba-funds")]
-        [Authorize(Roles = "CooperativeAdmin")]
+        [Authorize(Roles = "SystemAdmin")]
         public async Task<IActionResult> WithdrawNombaFunds(
             [FromServices] AjoCoreBackend.Application.Interfaces.Services.INombaApiClient nombaApiClient,
             [FromBody] AjoCoreBackend.Application.DTOs.Nomba.BankTransferRequest request)

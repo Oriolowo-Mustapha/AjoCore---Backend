@@ -27,7 +27,7 @@ namespace AjoCoreBackend.Persistence.Configurations
                     LastName = "Mustapha",
                     Username = "apha",
                     Email = "baseapha@gmail.com",
-                    PasswordHash = "HASH_PLACEHOLDER",
+                    PasswordHash = "$2a$12$BjORNSCRSBhTUck456hyBuQz4dhMQMj/HcDnmOUxWiGMRARp9Qln6",
                     Role = Domain.Enum.UserRole.SystemAdmin,
                     CreatedAt = new System.DateTime(2026, 1, 1, 0, 0, 0, System.DateTimeKind.Utc),
                     UpdatedAt = new System.DateTime(2026, 1, 1, 0, 0, 0, System.DateTimeKind.Utc)
@@ -39,7 +39,7 @@ namespace AjoCoreBackend.Persistence.Configurations
                     LastName = "Mubarak",
                     Username = "ghost",
                     Email = "adeyemiadigun12@gmail.com",
-                    PasswordHash = "HASH_PLACEHOLDER",
+                    PasswordHash = "$2a$12$q28FxVwEjqbz66XrZ8NfVu56dS8ZxAUPrVHRAwPLu4.Nakr/bJwm6",
                     Role = Domain.Enum.UserRole.SystemAdmin,
                     CreatedAt = new System.DateTime(2026, 1, 1, 0, 0, 0, System.DateTimeKind.Utc),
                     UpdatedAt = new System.DateTime(2026, 1, 1, 0, 0, 0, System.DateTimeKind.Utc)

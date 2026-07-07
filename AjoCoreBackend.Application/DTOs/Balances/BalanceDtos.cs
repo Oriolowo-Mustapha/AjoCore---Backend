@@ -44,6 +44,8 @@ namespace AjoCoreBackend.Application.DTOs.Balances
     {
         public decimal OverallTotalPaid { get; set; }
         public decimal PendingContributions { get; set; }
+        public decimal CurrentIntervalTarget { get; set; }
+        public decimal CurrentIntervalSaved { get; set; }
         public List<TraderCycleBalanceDto> CycleBalances { get; init; } = new();
     }
 

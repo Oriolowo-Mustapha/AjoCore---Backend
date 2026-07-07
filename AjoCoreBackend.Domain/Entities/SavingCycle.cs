@@ -15,7 +15,7 @@ namespace AjoCoreBackend.Domain.Entities
         
         [NotMapped]
         public decimal IndividualTargetAmount =>
-        EndDate == null || StartDate == null
+        EndDate == null || StartDate == null || IntervalDays <= 0
          ? 0
          : ContributionAmount *
            (((EndDate.Value - StartDate.Value).Days / IntervalDays) + 1);

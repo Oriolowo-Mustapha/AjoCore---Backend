@@ -47,8 +47,10 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
 
                 foreach (var cycle in activeCycles)
                 {
-                    if (cycle.CycleType == CycleType.Rosca)
+                    try
                     {
+                        if (cycle.CycleType == CycleType.Rosca)
+                        {
                         var cycleWithMembers = await _unitOfWork.SavingCycles.GetCycleWithMembersAsync(cycle.Id);
                         if (cycleWithMembers == null) continue;
 
@@ -165,100 +167,118 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
                     {
                         await ProcessLiquidationAsyncForPersonal(cycle);
                     }
-                }
 
-                await _unitOfWork.SaveChangesAsync(default);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred executing Hangfire Liquidation Sweep.");
-                throw;
+                    await _unitOfWork.SaveChangesAsync(default);
+                }
+                catch (Exception cycleEx)
+                {
+                    _logger.LogError(cycleEx, $"Error processing cycle {cycle.Id}");
+                }
             }
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred executing Hangfire Liquidation Sweep.");
+            throw;
+        }
+    }
 
 
         private async Task ProcessLiquidationAsyncForAsca(SavingCycle cycle)
         {
             var now = _dateTimeProvider.UtcNow;
             
-            // For ASCA, we can process payouts for all members at once
+            if (cycle.EndDate == null || cycle.EndDate.Value > now) return;
+
             var cycleWithMembers = await _unitOfWork.SavingCycles.GetCycleWithMembersAsync(cycle.Id);
             if (cycleWithMembers == null) return;
-            var member = cycleWithMembers.Members.FirstOrDefault();
-            if (member == null || member.VirtualAccount == null) return;
             
-            // Check if we already processed a payout for this member via Idempotent Ref
-            var merchantTxRef = $"payout_cycle{cycle.Id:N}_member{member.Id:N}";
-            var ledgers = await _unitOfWork.Repository<PayoutLedger>().FindAsync(l => l.MerchantTxRef == merchantTxRef);
-            if (ledgers.Any())
+            foreach (var member in cycleWithMembers.Members)
             {
-                return; // Already paid out
-            }
+                if (member.VirtualAccount == null) continue;
+                
+                var merchantTxRef = $"payout_cycle{cycle.Id:N}_member{member.Id:N}";
+                var ledgers = await _unitOfWork.Repository<PayoutLedger>().FindAsync(l => l.MerchantTxRef == merchantTxRef);
+                if (ledgers.Any())
+                {
+                    continue; // Already paid out
+                }
 
-            // Execute Payout
-            var totalPayout = cycle.IndividualTargetAmount;
-            
-            var trader = await _unitOfWork.Repository<Trader>().GetByIdAsync(member.UserId);
-            if (trader == null || string.IsNullOrWhiteSpace(trader.PayoutAccountNumber) || string.IsNullOrWhiteSpace(trader.PayoutBankName))
-            {
-                _logger.LogWarning($"No payout account configured for Trader {member.UserId}. Skipping payout.");
-                return;
-            }
+                var contributions = await _unitOfWork.Repository<ContributionLedger>().FindAsync(c => c.SavingCycleMemberId == member.Id);
+                var totalPayout = contributions.Sum(c => c.Amount);
+                if (totalPayout <= 0) continue;
+                
+                var trader = await _unitOfWork.Repository<Trader>().GetByIdAsync(member.UserId);
+                if (trader == null || string.IsNullOrWhiteSpace(trader.PayoutAccountNumber) || string.IsNullOrWhiteSpace(trader.PayoutBankName))
+                {
+                    _logger.LogWarning($"No payout account configured for Trader {member.UserId}. Skipping payout.");
+                    continue;
+                }
 
-            var actualBankCode = await _bankCodeService.GetBankCodeByNameAsync(trader.PayoutBankName);
-            
-            // Lookup bank name from Nomba before transfer (as per spec)
-            var lookupRequest = new Application.DTOs.Nomba.BankLookupRequest
-            {
-                AccountNumber = trader.PayoutAccountNumber,
-                BankCode = actualBankCode
-            };
+                var actualBankCode = await _bankCodeService.GetBankCodeByNameAsync(trader.PayoutBankName);
+                
+                var lookupRequest = new Application.DTOs.Nomba.BankLookupRequest
+                {
+                    AccountNumber = trader.PayoutAccountNumber,
+                    BankCode = actualBankCode
+                };
 
-            Application.DTOs.Nomba.BankLookupResponse lookupResponse = null;
-            try
-            {
-                lookupResponse = await _nombaApiClient.LookupBankAccountAsync(lookupRequest);
-                if (string.IsNullOrWhiteSpace(lookupResponse.AccountName))
+                Application.DTOs.Nomba.BankLookupResponse lookupResponse = null;
+                try
+                {
+                    lookupResponse = await _nombaApiClient.LookupBankAccountAsync(lookupRequest);
+                    if (string.IsNullOrWhiteSpace(lookupResponse.AccountName))
+                    {
+                        _logger.LogWarning($"Bank lookup failed for Account {lookupRequest.AccountNumber}, BankCode {lookupRequest.BankCode}");
+                        continue;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error occurred while looking up bank account for Account {lookupRequest.AccountNumber}, BankCode {lookupRequest.BankCode}");
+                    continue;
+                }
+
+                if (lookupResponse == null || string.IsNullOrWhiteSpace(lookupResponse.AccountName))
                 {
                     _logger.LogWarning($"Bank lookup failed for Account {lookupRequest.AccountNumber}, BankCode {lookupRequest.BankCode}");
-                    return;
+                    continue;
+                }
+                
+                var transferRequest = new BankTransferRequest
+                {
+                    Amount = totalPayout,
+                    AccountNumber = trader.PayoutAccountNumber,
+                    AccountName = lookupResponse.AccountName ?? "",
+                    BankCode = lookupRequest.BankCode,
+                    MerchantTxRef = merchantTxRef,
+                    SenderName = "AjoCore Thrift"
+                };
+
+                var transferResponse = await _nombaApiClient.ExecuteBankTransferAsync(transferRequest);
+
+                if (transferResponse != null)
+                {
+                    try
+                    {
+                        var payoutLedger = new PayoutLedger
+                        {
+                            SavingCycleMemberId = member.Id,
+                            Amount = totalPayout,
+                            MerchantTxRef = merchantTxRef,
+                            PayoutDate = now
+                        };
+                        await _unitOfWork.Repository<PayoutLedger>().AddAsync(payoutLedger);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Database error recording payout {merchantTxRef} for Merchant {member.Id}. Manual resolution required.");
+                    }
                 }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error occurred while looking up bank account for Account {lookupRequest.AccountNumber}, BankCode {lookupRequest.BankCode}");
-                return;
-            }
 
-            if(lookupResponse == null || string.IsNullOrWhiteSpace(lookupResponse.AccountName))
-            {
-                _logger.LogWarning($"Bank lookup failed for Account {lookupRequest.AccountNumber}, BankCode {lookupRequest.BankCode}");
-                return;
-            }
-            
-            var transferRequest = new BankTransferRequest
-            {
-                Amount = totalPayout,
-                AccountNumber = trader.PayoutAccountNumber,
-                AccountName = lookupResponse.AccountName ?? "",
-                BankCode = lookupRequest.BankCode,
-                MerchantTxRef = merchantTxRef,
-                SenderName = "AjoCore Thrift"
-            };
-
-            var transferResponse = await _nombaApiClient.ExecuteBankTransferAsync(transferRequest);
-
-            if (transferResponse != null)
-            {
-                var payoutLedger = new PayoutLedger
-                {
-                    SavingCycleMemberId = member.Id,
-                    Amount = totalPayout,
-                    MerchantTxRef = merchantTxRef,
-                    PayoutDate = now
-                };
-                await _unitOfWork.Repository<PayoutLedger>().AddAsync(payoutLedger);
-            }
+            cycle.Status = CycleStatus.Completed;
+            _unitOfWork.SavingCycles.Update(cycle);
         }
 
         private async Task ProcessLiquidationAsyncForPersonal(SavingCycle cycle)

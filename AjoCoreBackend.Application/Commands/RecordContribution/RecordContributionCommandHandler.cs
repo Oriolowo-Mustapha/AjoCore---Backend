@@ -90,8 +90,11 @@ namespace AjoCoreBackend.Application.Commands.RecordContribution
 
             // 4. Amount is already in Naira
             var amountInNaira = request.Amount;
+            
+            // Expected amount must be exactly ContributionAmount + 20 NGN for Nomba Transfer Fee
+            var expectedAmount = cycle.ContributionAmount + 20;
 
-            if (amountInNaira < cycle.ContributionAmount)
+            if (amountInNaira != expectedAmount)
             {
                 var reversal = new ReversalLedger
                 {
@@ -110,11 +113,11 @@ namespace AjoCoreBackend.Application.Commands.RecordContribution
                 return Guid.Empty; // Halt execution so we don't record the invalid contribution
             }
 
-            // 5. Record Ledger Entry
+            // 5. Record Ledger Entry (Discard the 20 NGN fee from user balance)
             var ledger = new ContributionLedger
             {
                 SavingCycleMemberId = member.Id,
-                Amount = amountInNaira,
+                Amount = cycle.ContributionAmount,
                 NombaWebhookRequestId = request.WebhookRequestId,
                 PaidAt = _dateTimeProvider.UtcNow
             };

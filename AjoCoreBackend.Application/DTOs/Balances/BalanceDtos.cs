@@ -56,5 +56,8 @@ namespace AjoCoreBackend.Application.DTOs.Balances
         public decimal TargetAmount { get; init; }
         public decimal TotalPaid { get; init; }
         public decimal RemainingAmount => Math.Max(0, TargetAmount - TotalPaid);
+        public int CurrentInterval { get; init; }
+        public decimal CurrentIntervalTarget { get; init; }
+        public decimal CurrentIntervalSaved { get; init; }
     }
 }

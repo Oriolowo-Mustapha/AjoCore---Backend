@@ -4,6 +4,7 @@ using AjoCoreBackend.Application.Commands.JoinSavingCycle;
 using AjoCoreBackend.Application.Commands.StartSavingCycle;
 using AjoCoreBackend.Application.Queries.GetAllSavingCycles;
 using AjoCoreBackend.Application.Queries.GetMemberContributions;
+using AjoCoreBackend.Application.Queries.GetMemberPayouts;
 using AjoCoreBackend.Application.Queries.GetSavingCycleById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -147,6 +148,16 @@ namespace AjoCoreBackend.API.Controllers
         public async Task<IActionResult> GetContributions(Guid memberId)
         {
             var result = await _mediator.Send(new GetMemberContributionsQuery { SavingCycleMemberId = memberId });
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get payouts for a specific member.
+        /// </summary>
+        [HttpGet("members/{memberId}/payouts")]
+        public async Task<IActionResult> GetPayouts(Guid memberId)
+        {
+            var result = await _mediator.Send(new GetMemberPayoutsQuery { SavingCycleMemberId = memberId });
             return Ok(result);
         }
 

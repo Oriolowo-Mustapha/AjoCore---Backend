@@ -17,19 +17,22 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
         private readonly IBankCodeService _bankCodeService;
         private readonly IDateTimeProvider _dateTimeProvider;
         private readonly ILogger<LiquidationSweepService> _logger;
+        private readonly IEmailService _emailService;
 
         public LiquidationSweepService(
             IUnitOfWork unitOfWork,
             INombaApiClient nombaApiClient,
             IBankCodeService bankCodeService,
             IDateTimeProvider dateTimeProvider,
-            ILogger<LiquidationSweepService> logger)
+            ILogger<LiquidationSweepService> logger,
+            IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _nombaApiClient = nombaApiClient;
             _bankCodeService = bankCodeService;
             _dateTimeProvider = dateTimeProvider;
             _logger = logger;
+            _emailService = emailService;
         }
 
         public async Task ProcessLiquidationsAsync()
@@ -130,6 +133,28 @@ namespace AjoCoreBackend.Infrastructure.BackgroundJobs
                                 PayoutDate = now
                             };
                             await _unitOfWork.Repository<PayoutLedger>().AddAsync(payoutLedger);
+
+                            // Broadcast notification to all members of the cycle
+                            try
+                            {
+                                var memberIds = cycleWithMembers.Members.Select(m => m.UserId).ToList();
+                                foreach (var memberId in memberIds)
+                                {
+                                    var memberTrader = await _unitOfWork.Repository<Trader>().GetByIdAsync(memberId);
+                                    if (memberTrader != null && !string.IsNullOrWhiteSpace(memberTrader.Email))
+                                    {
+                                        string subject = $"Payout Completed for {cycle.Name}";
+                                        string body = $"<p>Hello {memberTrader.FirstName},</p><p>We are pleased to inform you that <strong>{trader.FirstName} {trader.LastName}</strong> has successfully received the payout for Round {currentInterval} of the <strong>{cycle.Name}</strong> cycle.</p><p>Thank you for saving with AjoCore.</p>";
+                                        
+                                        // Fire and forget so we don't block the sweep
+                                        _ = _emailService.SendEmailAsync(memberTrader.Email, subject, body, true); 
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, $"Failed to send broadcast notifications for cycle {cycle.Id}, interval {currentInterval}.");
+                            }
                         }
                     }
                     else if (cycle.CycleType == CycleType.Asca)

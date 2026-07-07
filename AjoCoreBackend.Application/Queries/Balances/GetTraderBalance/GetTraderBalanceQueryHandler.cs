@@ -30,7 +30,9 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetTraderBalance
             var traderBalanceDto = new TraderBalanceDto
             {
                 OverallTotalPaid = 0,
-                PendingContributions = 0
+                PendingContributions = 0,
+                CurrentIntervalTarget = 0,
+                CurrentIntervalSaved = 0
             };
 
             foreach (var member in members)
@@ -55,11 +57,6 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetTraderBalance
 
                 traderBalanceDto.OverallTotalPaid += totalPaid;
 
-                if (cycle.Status == Domain.Enum.CycleStatus.Active)
-                {
-                    traderBalanceDto.PendingContributions += Math.Max(0, targetAmount - totalPaid);
-                }
-
                 decimal currentIntervalSaved = 0;
                 decimal currentIntervalTarget = cycle.ContributionAmount;
                 int currentInterval = 1;
@@ -75,6 +72,13 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetTraderBalance
                     currentIntervalSaved = memberContributions
                         .Where(c => c.PaidAt >= intervalStart && c.PaidAt < intervalEnd)
                         .Sum(c => c.Amount);
+                }
+
+                if (cycle.Status == Domain.Enum.CycleStatus.Active)
+                {
+                    traderBalanceDto.CurrentIntervalTarget += currentIntervalTarget;
+                    traderBalanceDto.CurrentIntervalSaved += currentIntervalSaved;
+                    traderBalanceDto.PendingContributions += Math.Max(0, currentIntervalTarget - currentIntervalSaved);
                 }
 
                 traderBalanceDto.CycleBalances.Add(new TraderCycleBalanceDto

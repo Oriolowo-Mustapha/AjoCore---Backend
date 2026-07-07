@@ -60,6 +60,23 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetTraderBalance
                     traderBalanceDto.PendingContributions += Math.Max(0, targetAmount - totalPaid);
                 }
 
+                decimal currentIntervalSaved = 0;
+                decimal currentIntervalTarget = cycle.ContributionAmount;
+                int currentInterval = 1;
+
+                if (cycle.StartDate.HasValue && cycle.IntervalDays > 0)
+                {
+                    var daysElapsed = (DateTime.UtcNow - cycle.StartDate.Value).TotalDays;
+                    currentInterval = (int)(Math.Max(0, daysElapsed) / cycle.IntervalDays) + 1;
+
+                    var intervalStart = cycle.StartDate.Value.AddDays((currentInterval - 1) * cycle.IntervalDays);
+                    var intervalEnd = intervalStart.AddDays(cycle.IntervalDays);
+
+                    currentIntervalSaved = memberContributions
+                        .Where(c => c.PaidAt >= intervalStart && c.PaidAt < intervalEnd)
+                        .Sum(c => c.Amount);
+                }
+
                 traderBalanceDto.CycleBalances.Add(new TraderCycleBalanceDto
                 {
                     CycleId = cycle.Id,
@@ -67,7 +84,10 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetTraderBalance
                     CycleType = cycle.CycleType.ToString(),
                     CycleStatus = cycle.Status.ToString(),
                     TargetAmount = targetAmount,
-                    TotalPaid = totalPaid
+                    TotalPaid = totalPaid,
+                    CurrentInterval = currentInterval,
+                    CurrentIntervalTarget = currentIntervalTarget,
+                    CurrentIntervalSaved = currentIntervalSaved
                 });
             }
 

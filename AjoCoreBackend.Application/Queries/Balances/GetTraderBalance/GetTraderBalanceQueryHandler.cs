@@ -45,9 +45,12 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetTraderBalance
                 if (cycle.CycleType == Domain.Enum.CycleType.Rosca)
                 {
                     // For ROSCA, target is ContributionAmount * total members
-                    // Since IUnitOfWork.SavingCycles.FindAsync does not eagerly load Members by default, we can fetch count
                     var allCycleMembers = await _unitOfWork.SavingCycleMembers.FindAsync(m => m.SavingCycleId == cycle.Id);
                     targetAmount = cycle.ContributionAmount * allCycleMembers.Count();
+                }
+                else if (cycle.CycleType == Domain.Enum.CycleType.Asca && cycle.DurationInIntervals.HasValue)
+                {
+                    targetAmount = cycle.ContributionAmount * cycle.DurationInIntervals.Value;
                 }
 
                 traderBalanceDto.OverallTotalPaid += totalPaid;

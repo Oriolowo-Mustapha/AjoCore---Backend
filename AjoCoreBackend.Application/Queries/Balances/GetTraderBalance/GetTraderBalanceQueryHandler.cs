@@ -44,15 +44,22 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetTraderBalance
                 var totalPaid = memberContributions.Sum(c => c.Amount);
                 
                 decimal targetAmount = cycle.IndividualTargetAmount;
+                int memberCount = 1;
                 if (cycle.CycleType == Domain.Enum.CycleType.Rosca)
                 {
                     // For ROSCA, target is ContributionAmount * total members
                     var allCycleMembers = await _unitOfWork.SavingCycleMembers.FindAsync(m => m.SavingCycleId == cycle.Id);
-                    targetAmount = cycle.ContributionAmount * allCycleMembers.Count();
+                    memberCount = allCycleMembers.Count();
+                    targetAmount = cycle.ContributionAmount * memberCount;
                 }
-                else if (cycle.CycleType == Domain.Enum.CycleType.Asca && cycle.DurationInIntervals.HasValue)
+                else if (cycle.CycleType == Domain.Enum.CycleType.Asca)
                 {
-                    targetAmount = cycle.ContributionAmount * cycle.DurationInIntervals.Value;
+                    var allCycleMembers = await _unitOfWork.SavingCycleMembers.FindAsync(m => m.SavingCycleId == cycle.Id);
+                    memberCount = allCycleMembers.Count();
+                    if (cycle.DurationInIntervals.HasValue)
+                    {
+                        targetAmount = cycle.ContributionAmount * cycle.DurationInIntervals.Value;
+                    }
                 }
 
                 traderBalanceDto.OverallTotalPaid += totalPaid;
@@ -91,7 +98,9 @@ namespace AjoCoreBackend.Application.Queries.Balances.GetTraderBalance
                     TotalPaid = totalPaid,
                     CurrentInterval = currentInterval,
                     CurrentIntervalTarget = currentIntervalTarget,
-                    CurrentIntervalSaved = currentIntervalSaved
+                    CurrentIntervalSaved = currentIntervalSaved,
+                    IntervalDays = cycle.IntervalDays,
+                    MemberCount = memberCount
                 });
             }
 

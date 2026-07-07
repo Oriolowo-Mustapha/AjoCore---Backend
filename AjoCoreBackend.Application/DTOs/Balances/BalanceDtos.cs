@@ -61,5 +61,7 @@ namespace AjoCoreBackend.Application.DTOs.Balances
         public int CurrentInterval { get; init; }
         public decimal CurrentIntervalTarget { get; init; }
         public decimal CurrentIntervalSaved { get; init; }
+        public int IntervalDays { get; init; }
+        public int MemberCount { get; init; }
     }
 }

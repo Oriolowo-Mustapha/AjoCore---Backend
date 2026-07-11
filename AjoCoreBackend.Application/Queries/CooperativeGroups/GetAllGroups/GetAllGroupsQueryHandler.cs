@@ -50,10 +50,8 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetAllGroups
 
                 // Fetch cycle members and their contributions for the TotalSaved calculation
                 decimal totalSaved = 0;
-                bool isActive = false;
                 foreach (var cycle in cycles)
                 {
-                    if (cycle.Status == CycleStatus.Active) isActive = true;
                     var cycleMembers = await _unitOfWork.Repository<SavingCycleMember>().FindAsync(m => m.SavingCycleId == cycle.Id);
                     foreach(var cm in cycleMembers) {
                         var contributions = await _unitOfWork.Repository<ContributionLedger>().FindAsync(c => c.SavingCycleMemberId == cm.Id);
@@ -84,7 +82,7 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetAllGroups
                     CycleCount = cycles.Count(),
                     SavingsGoal = cycles.Sum(c => c.ContributionAmount), // Wait, is SavingsGoal ContributionAmount * members? The prompt says "sum of all ContributionAmount values across all cycles"
                     TotalSaved = totalSaved,
-                    IsActive = isActive,
+                    IsActive = group.Status == GroupStatus.Active,
                     CreatedAt = group.CreatedAt,
                     MembershipStatus = membershipStatus
                 });

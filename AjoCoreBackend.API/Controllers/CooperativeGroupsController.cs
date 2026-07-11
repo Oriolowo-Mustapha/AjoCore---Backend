@@ -140,5 +140,49 @@ namespace AjoCoreBackend.API.Controllers
             var result = await _mediator.Send(command);
             return Ok(new { status = "Processed", results = result });
         }
+
+        /// <summary>
+        /// Admin deactivates a cooperative group.
+        /// </summary>
+        [Authorize(Roles = "CooperativeAdmin")]
+        [HttpPost("{groupId}/deactivate")]
+        public async Task<IActionResult> Deactivate(Guid groupId)
+        {
+            await _mediator.Send(new AjoCoreBackend.Application.Commands.CooperativeGroups.DeactivateGroup.DeactivateGroupCommand { GroupId = groupId });
+            return Ok(new { status = "Deactivated" });
+        }
+
+        /// <summary>
+        /// Admin removes a member from the group.
+        /// </summary>
+        [Authorize(Roles = "CooperativeAdmin")]
+        [HttpDelete("{groupId}/members/{membershipId}")]
+        public async Task<IActionResult> RemoveMember(Guid groupId, Guid membershipId)
+        {
+            await _mediator.Send(new AjoCoreBackend.Application.Commands.CooperativeGroups.RemoveMember.RemoveMemberCommand { GroupId = groupId, MembershipId = membershipId });
+            return Ok(new { status = "Removed" });
+        }
+
+        /// <summary>
+        /// Admin views payout ledger for a group.
+        /// </summary>
+        [Authorize(Roles = "CooperativeAdmin")]
+        [HttpGet("{groupId}/payouts")]
+        public async Task<IActionResult> GetPayouts(Guid groupId, [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        {
+            var result = await _mediator.Send(new AjoCoreBackend.Application.Queries.CooperativeGroups.GetGroupPayouts.GetGroupPayoutsQuery { GroupId = groupId, FromDate = fromDate, ToDate = toDate });
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Admin views contribution ledger for a group.
+        /// </summary>
+        [Authorize(Roles = "CooperativeAdmin")]
+        [HttpGet("{groupId}/contributions")]
+        public async Task<IActionResult> GetContributions(Guid groupId, [FromQuery] Guid? cycleId, [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        {
+            var result = await _mediator.Send(new AjoCoreBackend.Application.Queries.CooperativeGroups.GetGroupContributions.GetGroupContributionsQuery { GroupId = groupId, CycleId = cycleId, FromDate = fromDate, ToDate = toDate });
+            return Ok(result);
+        }
     }
 }

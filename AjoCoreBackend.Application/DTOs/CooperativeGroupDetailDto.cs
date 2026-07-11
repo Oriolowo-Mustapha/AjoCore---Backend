@@ -15,7 +15,9 @@ namespace AjoCoreBackend.Application.DTOs
     {
         public Guid TraderId { get; init; }
         public string TraderName { get; init; } = string.Empty;
+        public string TraderPhone { get; init; } = string.Empty;
         public DateTime JoinedAt { get; init; }
+        public Guid MembershipId { get; init; } // I'll also add MembershipId since we need it for removing a member
     }
 
     public record SavingCycleSummaryDto

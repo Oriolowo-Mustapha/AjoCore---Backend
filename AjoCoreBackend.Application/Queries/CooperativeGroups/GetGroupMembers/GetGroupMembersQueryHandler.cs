@@ -44,6 +44,7 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetGroupMembers
                     TraderId = member.TraderId,
                     TraderName = trader != null ? $"{trader.FirstName} {trader.LastName}" : "Unknown",
                     TraderEmail = trader?.Email ?? "",
+                    TraderPhone = trader?.PhoneNumber ?? "",
                     Status = member.Status.ToString(),
                     CreatedAt = member.CreatedAt,
                     ApprovedAt = member.ApprovedAt

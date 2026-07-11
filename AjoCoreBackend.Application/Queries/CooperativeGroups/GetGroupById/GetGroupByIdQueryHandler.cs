@@ -43,10 +43,8 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetGroupById
                 .FindAsync(c => c.CooperativeGroupId == group.Id);
 
             decimal totalSaved = 0;
-            bool isActive = false;
             foreach (var cycle in cycles)
             {
-                if (cycle.Status == CycleStatus.Active) isActive = true;
                 var cycleMembers = await _unitOfWork.Repository<SavingCycleMember>().FindAsync(m => m.SavingCycleId == cycle.Id);
                 foreach(var cm in cycleMembers) {
                     var contributions = await _unitOfWork.Repository<ContributionLedger>().FindAsync(c => c.SavingCycleMemberId == cm.Id);
@@ -65,14 +63,16 @@ namespace AjoCoreBackend.Application.Queries.CooperativeGroups.GetGroupById
                 CycleCount = cycles.Count(),
                 SavingsGoal = cycles.Sum(c => c.ContributionAmount),
                 TotalSaved = totalSaved,
-                IsActive = isActive,
+                IsActive = group.Status == GroupStatus.Active,
                 CreatedAt = group.CreatedAt,
                 Members = approvedMembers.Select(m => {
                     var trader = traders.FirstOrDefault(t => t.Id == m.TraderId);
                     return new GroupMemberSummaryDto {
                         TraderId = m.TraderId,
                         TraderName = trader != null ? $"{trader.FirstName} {trader.LastName}" : "Unknown",
-                        JoinedAt = m.CreatedAt
+                        TraderPhone = trader != null ? trader.PhoneNumber : "Unknown",
+                        JoinedAt = m.CreatedAt,
+                        MembershipId = m.Id
                     };
                 }).ToList(),
                 PendingRequests = pendingMembers.Select(m => {

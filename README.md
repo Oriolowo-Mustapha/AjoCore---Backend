@@ -279,4 +279,4 @@ This project is licensed under the MIT License.
 ## Authors / Contact
 
 - Developed by the AjoCore Team
-- Support Contact: [support@ajocore.app](mailto:support@ajocore.app)
+- Support Contact: [support@ajocore.app](mailto:oriolowomustapha@gmail.com)
